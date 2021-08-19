@@ -1,32 +1,45 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <v-app>
+    <AppBar v-if="$session.get('session')" app />
+    <v-main>
+      <router-view />
+      <v-snackbar v-model="snackbar.activated" vertical shaped>
+
+        <span class="overline font-weight-bold">
+          {{ snackbar.title }}
+        </span>
+        <v-divider />
+        <p>{{ snackbar.message }}</p>
+
+        <template v-slot:action="{ attrs }">
+          <v-icon :color="snackbar.error ? 'error' : 'success'" v-bind="attrs">
+            {{ snackbar.error ? 'mdi-alert-circle-outline' : 'mdi-check' }}
+          </v-icon>
+        </template>
+      </v-snackbar>
+    </v-main>
+  </v-app>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
 
-#nav {
-  padding: 30px;
-}
+import AppBar from '@/layout/AppBar.vue'
+import { mapState, mapMutations, mapActions } from 'vuex'
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+export default {
+  name: 'App',
+  components: { AppBar },
+  computed: { ...mapState(['snackbar']) },
+  methods: { ...mapMutations(['logIn']), ...mapActions(['getcollections']) },
+  created () {
+    const activeSession = this.$session.get('session')
+    if (activeSession) {
+      this.logIn(activeSession)
+      this.getcollections()
+    } else {
+      this.$router.push('/login')
+    }
+  }
 
-#nav a.router-link-exact-active {
-  color: #42b983;
 }
-</style>
+</script>
