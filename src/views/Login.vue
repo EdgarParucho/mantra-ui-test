@@ -1,69 +1,124 @@
 <template>
   <v-container>
     <v-img
+      class="pb-5"
+      app
       style="position: fixed;
         top: 0;
         left: 0;
-        min-width: 100%;
         min-height: 100%;
+        min-width: 100%;
       "
-      src="@/assets/background/bg.jpg"
+      src="@/assets/background/bg12.jpg"
     >
-      <v-row class="mt-10" justify="center">
-        <v-col :cols="mobile ? 11 : 6">
-          <v-card class="mt-15" style="opacity:80%;" dark>
-            <v-form>
-              <v-card-text>
-                <v-card-title>Inicie sesión</v-card-title>
-                <v-row justify="center">
-                  <v-col :cols="mobile ? 10 : 8">
-                    <v-text-field
-                      v-model="loginForm.idDocument"
-                      prepend-inner-icon="mdi-account-circle"
-                      label="Usuario"
-                    />
-                  </v-col>
-                </v-row>
-                <v-row justify="center">
-                  <v-col :cols="mobile ? 10 : 8">
-                    <v-text-field
-                      v-model="loginForm.userPassword"
-                      prepend-inner-icon="mdi-key"
-                      type="password"
-                      label="Contraseña"
-                    />
-                  </v-col>
-                </v-row>
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  class="mx-auto"
-                  @click="tryLog(loginForm)"
-                  text
-                  color="primary"
-                  :loading="loader"
-                >
-                  Iniciar
-                </v-btn>
-              </v-card-actions>
-              <v-row justify="end">
-                <v-tooltip dark right>
-                  <template v-slot:activator="{ on }">
-                    <v-btn class="mr-5" v-on="on" target="_blank" icon href="https://wa.me/+584142861620">
-                      <v-icon>mdi-whatsapp</v-icon>
+      <v-alert
+        type="info"
+        color="dark"
+        icon="mdi-information-outline"
+        tile
+      >
+        Elige un perfil de prueba para iniciar
+      </v-alert>
+      <v-row justify="center">
+        <v-col :cols="mobile ? 11 : 5">
+          <v-card :loading="loader" style="opacity:80%;">
+            <v-card-title>Bienvenido a Mantra</v-card-title>
+            <v-card-subtitle>Inicia sesión para continuar</v-card-subtitle>
+            <v-row>
+              <v-col :cols="4">
+                <v-row>
+                  <v-col align="center">
+                    <v-img src="@/assets/logoMfc.png" width="70" />
+                    <v-spacer />
+                    <v-btn href="https://instagram.com/microfilmscenter" target="blank" color="primary" icon>
+                      <v-icon>mdi-instagram</v-icon>
                     </v-btn>
-                  </template>
-                  Encontraste errores?
-                  <br>
-                  Tienes sugerencias?
-                  <v-divider class="my-1"></v-divider>
-                  Escríbeme
-                </v-tooltip>
-              </v-row>
-            </v-form>
+                    <v-btn href="https://microfilmscenter.com" target="blank" color="primary" icon>
+                      <v-icon>mdi-web</v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-divider vertical />
+              <v-col :cols="8">
+                <v-form>
+                  <v-row justify="start">
+                    <v-col :cols="11" align="start">
+                      <v-select
+                        v-model="selectedUser"
+                        solo
+                        :items="users"
+                        :prepend-inner-icon="mobile ? '' : 'mdi-account-circle'"
+                        placeholder="Usuario"
+                        dense
+                        autofocus
+                      />
+                      <v-text-field
+                        readonly
+                        :prepend-inner-icon="mobile ? '' : 'mdi-key'"
+                        type="password"
+                        placeholder="Contraseña"
+                      />
+                      <v-btn
+                        @click="tryLog(selectedUser)"
+                        :loading="loader"
+                        color="primary"
+                        block
+                        small
+                      >
+                        Iniciar
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </v-form>
+              </v-col>
+            </v-row>
           </v-card>
         </v-col>
       </v-row>
+      <template>
+        <v-footer
+          class="mt-15"
+          fixed
+          bottom
+          dark
+          padless
+        >
+          <v-card
+            min-width="100%"
+            flat
+            tile
+            class="text-center"
+          >
+            <v-card-text>
+              <v-btn
+                v-for="link, index in links"
+                :key="index"
+                class="mx-4"
+                :href="link.url"
+                target="blank"
+                icon
+              >
+                <v-icon size="24px">
+                  {{ link.icon }}
+                </v-icon>
+              </v-btn>
+            </v-card-text>
+
+            <v-card-text
+              class="pt-0">
+              Mantra es una herramienta gestión de operaciones desarrollada para Microfilms Center.
+              Eres libre de escribir datos en esta versión de pruebas.
+            </v-card-text>
+
+            <v-divider></v-divider>
+
+            <v-card-text>
+              {{ new Date().getFullYear() }} — Desarrollado por <strong>Edgar Parucho</strong>
+            </v-card-text>
+          </v-card>
+        </v-footer>
+      </template>
     </v-img>
 
   </v-container>
@@ -75,10 +130,18 @@ export default {
   name: 'Login',
   data: () => ({
     loader: false,
-    loginForm: {
-      idDocument: '',
-      userPassword: ''
-    }
+    selectedUser: '',
+    users: [
+      { text: 'Edgar Parucho (Admin)', value: { idDocument: '20926619', userPassword: '20926619' } },
+      { text: 'Samuel Vivas (Usuario - Almacén)', value: { idDocument: '15367598', userPassword: '15367598' } },
+      { text: 'Bryan Sanz (Usuario - Help Desk)', value: { idDocument: '20491189', userPassword: '20491189' } }
+    ],
+    links: [
+      { icon: 'mdi-whatsapp', url: 'https://wa.me/+584142861620' },
+      { icon: 'mdi-linkedin', url: 'https://www.linkedin.com/in/edgar-parucho-045769211/?lipi=urn%3Ali%3Apage%3Aprofile_view_index_index%3BHCUWI1GSTqe%2F%2Fbiw922TzQ%3D%3D' },
+      { icon: 'mdi-email', url: 'mailto:parucho.edgar@outlook.es' },
+      { icon: 'mdi-github', url: 'https://github.com/parucho' }
+    ]
   }),
   computed: {
     mobile () {
@@ -87,9 +150,10 @@ export default {
   },
   methods: {
     ...mapActions(['logIn', 'getcollections']),
-    tryLog () {
+    tryLog (user) {
+      console.log(user);
       this.loader = true
-      this.logIn(this.loginForm)
+      this.logIn(user)
         .then((session) => {
           this.$session.start()
           this.$session.set('session', session)

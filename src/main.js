@@ -10,8 +10,8 @@ import axios from 'axios'
 import excel from 'vue-excel-export'
 import vueSession from 'vue-session'
 
-axios.defaults.baseURL = 'http://localhost:3000/api'
-// axios.defaults.baseURL = 'https://edea-v2.herokuapp.com/api'
+// axios.defaults.baseURL = 'http://localhost:3000/api'
+axios.defaults.baseURL = 'https://testing-mantra.herokuapp.com/api'
 
 Vue.config.productionTip = false
 Vue.use(vueSession)

@@ -68,7 +68,6 @@ export default {
         moment(service.schedule.scheduledDate).parseZone('America/Caracas').format('D-M-yy') === moment(new Date()).format('D-M-yy')
       const allServices = [...this.collections.Active, ...this.collections.Closed, ...this.collections.Maintenance]
       const todaySchedule = allServices.filter(todayFilter)
-      console.log(todaySchedule, this.collections.Closed)
       return todaySchedule
     },
 

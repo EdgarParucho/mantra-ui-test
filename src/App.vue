@@ -34,7 +34,6 @@ export default {
   created () {
     const activeSession = this.$session.get('session')
     if (activeSession) {
-      this.logIn(activeSession)
       this.getcollections()
     } else {
       this.$router.push('/login')
