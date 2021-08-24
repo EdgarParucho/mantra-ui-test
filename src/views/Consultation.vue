@@ -5,7 +5,7 @@
       subtitle="Especifique los valores para realizar una consulta"
     />
     <v-sheet class="px-3">
-      <v-row>
+      <v-row align="center">
         <v-col>
           <v-tabs v-model="tab">
             <v-tabs-slider color="accent" />
@@ -13,7 +13,7 @@
             <v-tab :disabled="!result.length">Resultado</v-tab>
           </v-tabs>
         </v-col>  
-        <v-col align="end">
+        <v-col>
           <QueryChips v-show="!tab" @submitQuery="searchCorrective" />
         </v-col>
       </v-row>
@@ -21,10 +21,9 @@
         <v-tab-item>
           <v-form ref="form">
             <v-row>
-
               <v-col :cols="mobile ? 12 : 6">
                 <v-row align="center">
-                  <v-col :cols="mobile ? 9 : 8">
+                  <v-col :cols="6">
                     <v-radio-group row v-model="serviceType">
                       <v-radio
                         class="ml-2"
@@ -35,8 +34,8 @@
                       />
                     </v-radio-group>
                   </v-col>
-                  <v-col :cols="mobile ? 3 : 4" align="end">
-                    <v-btn class="my-1" @click="clearFilter" color="accent" small>
+                  <v-col align="end">
+                    <v-btn v-show="!tab" class="my-1" @click="clearFilter" :block="mobile" color="accent" small>
                       <v-icon>mdi-broom</v-icon>
                     </v-btn>
                   </v-col>
@@ -96,6 +95,7 @@
 
               <v-col :cols="mobile ? 12 : 6">
                 <v-row class="mt-4">
+                  
                   <v-col>
                     <v-date-picker
                       v-model="dates"
@@ -107,7 +107,18 @@
                     />
                   </v-col>
                 </v-row>
+                <small class="font-weight-bold">Filtrar por fecha de:</small>
                 <v-row>
+                  <v-col :cols="mobile ? 12 : 6">
+                    <v-radio-group row v-model="dateFilter" :disabled="serviceType === 'Preventivo'">
+                      <v-radio
+                        v-for="(n, i) in ['reportedAt', 'schedule.scheduledDate']"
+                        :key="i"
+                        :label="n === 'reportedAt' ? 'Reporte' : 'Atención'"
+                        :value="n"
+                      />
+                    </v-radio-group>
+                  </v-col>
                   <v-col :cols="mobile ? 12 : 6">
                     <v-chip-group color="accent">
                       <v-icon>mdi-filter</v-icon>
@@ -115,13 +126,6 @@
                       <v-chip @click="dateQuickFilter('thisMonth')" small>{{ thisMonth }}</v-chip>
                       <v-chip @click="dateQuickFilter('lastMonth')" small>{{ lastMonth }}</v-chip>
                     </v-chip-group>
-                  </v-col>
-                  <v-col :cols="mobile ? 12 : 6">
-                    <v-text-field
-                      v-model="dateRangeText"
-                      label="Rango"
-                      readonly
-                    />
                   </v-col>
                 </v-row>
                 <v-btn
@@ -165,6 +169,7 @@ export default {
     return {
       // Form data
       filter: {},
+      dateFilter: 'schedule.scheduledDate',
       technician: '',
       serviceType: 'Correctivo',
       dates: [],
@@ -194,10 +199,6 @@ export default {
 
     lastMonth () {
       return moment(new Date()).subtract(1, 'month').format('MMMM')
-    },
-
-    dateRangeText () {
-      return this.dates.join(' ~ ')
     },
 
     minDate () {
@@ -318,7 +319,8 @@ export default {
           Tecnico: lasVisit ? lasVisit.technician.fullName : data[i].schedule.technician.fullName,
           Categoria: data[i].category,
           Repuestos,
-          Visitas
+          Visitas,
+          Zona: data[i].isLocal ? 'Local' : 'Foránea'
         })
       }
       this.xlsFormat = rows
@@ -345,6 +347,15 @@ export default {
       }
       this.xlsFormat = rows
       this.tab = 1
+    },
+
+    assembleFilter () {
+      const filterDateBy = this.serviceType === 'Preventivo' ? 'schedule.scheduledDate' : this.dateFilter
+      this.filter["$and"] = [
+        { [filterDateBy]: { "$gte": this.dates[0] } },
+        { [filterDateBy]: { "$lte": this.dates[1] } },
+        { "schedule.technician.fullName": this.technician.fullName }
+      ]
     }
   },
 
@@ -355,47 +366,21 @@ export default {
     },
 
     technician: function () {
-      this.filter["$and"] =
-        this.serviceType === 'Correctivo'
-          ?  [
-              { "reportedAt": { "$gte": this.dates[0] } },
-              { "reportedAt": { "$lte": this.dates[1] } },
-              { "schedule.technician.fullName": this.technician.fullName }
-            ]
-          : [
-              { "schedule.scheduledDate": { "$gte": this.dates[0] } },
-              { "schedule.scheduledDate": { "$lte": this.dates[1] } },
-              { "schedule.technician": this.technician }
-            ]
+      this.assembleFilter()
     },
 
     serviceType: function () {
-      this.filter["$and"] = this.serviceType === 'Correctivo'
-        ?  [
-            { "reportedAt": { "$gte": this.dates[0] } },
-            { "reportedAt": { "$lte": this.dates[1] } },
-            { "schedule.technician.fullName": this.technician.fullName }
-          ]
-        : [
-            { "schedule.scheduledDate": { "$gte": this.dates[0] } },
-            { "schedule.scheduledDate": { "$lte": this.dates[1] } },
-            { "schedule.technician.fullName": this.technician.fullName }
-          ]
+      this.assembleFilter()
     },
 
     dates: function () {
-      this.filter["$and"] = this.serviceType === 'Correctivo'
-        ?  [
-            { "reportedAt": { "$gte": this.dates[0] } },
-            { "reportedAt": { "$lte": this.dates[1] } },
-            { "schedule.technician.fullName": this.technician.fullName }
-          ]
-        : [
-            { "schedule.scheduledDate": { "$gte": this.dates[0] } },
-            { "schedule.scheduledDate": { "$lte": this.dates[1] } },
-            { "schedule.technician.fullName": this.technician.fullName }
-          ]
+      this.assembleFilter()
+    },
+  
+    dateFilter: function () {
+      this.assembleFilter()
     }
   }
+
 }
 </script>
