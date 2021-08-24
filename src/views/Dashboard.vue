@@ -10,7 +10,7 @@
       <v-col :cols="mobile ? 12 : 9">
         <v-card>
           <v-card-title>Asignaciones del día</v-card-title>
-          <v-chip-group color="secondary">
+          <v-chip-group mandatory active-class="primary--text" light>
             <v-icon>mdi-filter</v-icon>
             <v-chip @click="showTodays = true" small>
               {{ today }}

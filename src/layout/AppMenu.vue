@@ -1,39 +1,6 @@
 <template>
   <v-container>
-    <v-list-item :color="$vuetify.theme.dark ? 'dark' : 'primary'" dark>
-      <v-list-item-content>
-        <v-list-item-title class="title">
-          EDEA
-        </v-list-item-title>
-        <v-list-item-subtitle class="overline">
-          v2
-        </v-list-item-subtitle>
-      </v-list-item-content>
-
-      <v-tooltip right>
-        <template v-slot:activator="{ on }">
-          <v-btn v-on="on" target="_blank" icon href="https://wa.me/+584142861620">
-            <v-icon>mdi-whatsapp</v-icon>
-          </v-btn>
-        </template>
-        Encontraste errores?
-        <v-divider></v-divider>
-        Tienes sugerencias?
-        <v-divider class="my-1"></v-divider>
-        <v-avatar class="mr-2" size="35">
-          <!-- <img src="@/assets/maskable.png"> -->
-          EP
-        </v-avatar>
-        <v-chip label outlined class="overline">
-          E. Parucho
-        </v-chip>
-      </v-tooltip>
-    </v-list-item>
-
-    <v-divider />
-
-    <v-list color="primary" dark dense nav>
-
+    <v-list color="hsla(140, 45%, 55%, .3)" dark dense nav elevation="1">
       <v-list-item
         v-for="option in options"
         :key="option.title"

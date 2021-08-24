@@ -151,7 +151,6 @@ export default {
   methods: {
     ...mapActions(['logIn', 'getcollections']),
     tryLog (user) {
-      console.log(user);
       this.loader = true
       this.logIn(user)
         .then((session) => {

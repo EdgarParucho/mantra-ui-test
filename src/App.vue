@@ -33,12 +33,23 @@ export default {
   methods: { ...mapMutations(['logIn']), ...mapActions(['getcollections']) },
   created () {
     const activeSession = this.$session.get('session')
+    this.$store.state.session = activeSession
     if (activeSession) {
       this.getcollections()
     } else {
-      this.$router.push('/login')
+      if (this.$router.currentRoute.fullPath !== '/login') this.$router.push('/login')
     }
   }
 
 }
 </script>
+
+<style>
+.gradients {
+  background: hsla(209, 100%, 45%, 1);
+  background: linear-gradient(90deg, hsla(180, 100%, 45%, 1) 0%, hsla(140, 100%, 45%, 1) 100%);
+  background: -moz-linear-gradient(90deg, hsla(180, 100%, 45%, 1) 0%, hsla(140, 100%, 45%, 1) 100%);
+  background: -webkit-linear-gradient(90deg, hsla(170, 100%, 40%, 1) 0%, hsla(145, 85%, 45%, 1) 100%);
+  filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#0075E6", endColorstr="#00EE6E", GradientType=1 );
+}
+</style>

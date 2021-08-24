@@ -3,12 +3,12 @@
     <v-tooltip left color="primary">
       <template v-slot:activator="{ on }">
         <v-btn
-          class="mb-15 mr-10"
+          class="mb-15 mr-10 gradients"
           :disabled="disabled"
           :loading="loading"
           v-on="on"
-          color="primary"
           absolute
+          dark
           bottom
           fixed
           right

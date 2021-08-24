@@ -5,7 +5,7 @@
       <v-list-item>
 
         <v-list-item-avatar v-show="!mobile">
-          <v-icon :class="$vuetify.theme.dark ? 'dark' : 'grey lighten-2'" dark>
+          <v-icon :class="$vuetify.theme.dark ? 'dark' : 'gradients'" dark>
             mdi-label
           </v-icon>
         </v-list-item-avatar>
@@ -16,10 +16,10 @@
               class="subtitle-1 font-weight-bold"
               :value="service.itsSpecial"
               bordered
-              color="secondary"
+              color="accent"
               icon="mdi-medal-outline"
             >
-              {{ service.reportCode }}
+              <span>{{ service.reportCode }}</span>
             </v-badge>
           </v-list-item-title>
 
@@ -73,16 +73,16 @@
 
         <v-list-item-action>
           <v-btn @click="showInterface('details', service)" icon small>
-            <v-icon color="grey lighten-1">mdi-information-outline</v-icon>
+            <v-icon color="primary">mdi-information-outline</v-icon>
           </v-btn>
 
           <v-menu>
             <template v-slot:activator="{ on }">
               <v-btn icon small v-on="on">
-                <v-icon color="accent">mdi-dots-vertical</v-icon>
+                <v-icon color="primary">mdi-dots-vertical</v-icon>
               </v-btn>
             </template>
-            <v-list dense>
+            <v-list color="primary" dark dense>
               <v-list-item-group>
                 <v-list-item
                   v-for="option, index in actionsMenu" :key="index"

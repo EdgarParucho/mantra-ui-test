@@ -26,7 +26,7 @@
             </v-col>
             <v-col :cols="mobile ? 6 : 3">
               <v-text-field
-                v-model.number="officeForm.code"
+                v-model="officeForm.code"
                 :rules="rules.officeCode"
                 label="Código"
                 maxlength="4"

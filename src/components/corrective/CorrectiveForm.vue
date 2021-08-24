@@ -278,7 +278,7 @@ export default Vue.extend({
         : []
 
       let productName = []
- 
+
       if (form.itsSpecial) productName = _.Product.map(product => product.productName)
       else if (this.clientContract) productName = this.clientContract.products.map(product => product.productName)
 

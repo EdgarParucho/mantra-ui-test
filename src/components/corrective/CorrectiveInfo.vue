@@ -3,10 +3,20 @@
     <Header
       closable="1"
       title="Documentación"
-      :subtitle="`Servicio: ${selectedDocument.reportCode}`"
+      subtitle="Resumen e historial del servicio"
       @hideInterface="$emit('hideInterface')"
     />
-    <v-card class="mx-auto" max-width="774">
+    <v-card class="mx-auto" elevation="2">
+      <v-row align="center" justify="center">
+        <v-col align="center">
+          <v-avatar class="mb-2" color="secondary">
+            <v-avatar size="90%" color="white">
+              <v-img src="@/assets/logoMfc.png"></v-img>
+            </v-avatar>
+          </v-avatar>
+        </v-col>
+      </v-row>
+      <v-divider></v-divider>
       <v-row>
         <v-col :cols="mobile ? 12 : 6">
           <v-card-title>Servicio {{ selectedDocument.reportCode }}</v-card-title>
@@ -21,7 +31,9 @@
             </div>
             <div class="my-1 text-subtitle-2">
               <v-icon small>mdi-timer-outline</v-icon>
-              Expira: {{ selectedDocument.expireDate | friendlyDate }}
+              Expira:
+              <span v-if="selectedDocument.itsSpecial">S. L. A. No aplicado</span>
+              <span v-else>{{ selectedDocument.expireDate | friendlyDate }}</span>
             </div>
             <div class="my-1 text-subtitle-2">
               <v-icon small>mdi-cog</v-icon>
@@ -80,22 +92,28 @@
 
     <v-row class="mt-10">
       <v-col>
-        <h3>Acciones registradas</h3>
-
+        <v-alert type="info" icon="mdi-information-outline" rounded="pill" text>
+          Acciones registradas
+          </v-alert>
         <v-timeline
-          dense
+          align-top
           reverse
+          :dense="mobile"
         >
           <v-timeline-item
             v-for="documentation, index in selectedDocument.documentation"
             :key="index"
+            fill-dot
           >
-            <v-card class="elevation-1 ">
-              <v-card-title class="headline">
+            <v-card class="elevation-2 my-1" outlined color="#eee">
+              <v-card-title class="text-h6 text-no-wrap">
                 {{ documentation.type }}
               </v-card-title>
-              <v-card-text>
+              <v-card-text class="white text--primary">
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus, porro impedit? Accusantium, sed magni quae illum dolore labore itaque aut necessitatibus saepe repellendus facilis iste? Id ad aliquid tempora voluptatem!
                 {{ documentation.observations }}
+                </p>
               </v-card-text>
               <v-container v-if="documentation.serviceOrder">
                 <section v-if="documentation.serviceOrder.number">
@@ -213,7 +231,7 @@ export default Vue.extend({
   filters: {
 
     friendlyDate (date) {
-      return moment(date).parseZone('America/Caracas').format('LLL')
+      return moment(date).parseZone('America/Caracas').format('DD/MM/YYYY HH:mm')
     },
 
     initials (name) {

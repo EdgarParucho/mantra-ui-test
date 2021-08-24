@@ -227,8 +227,12 @@ export default new Vuex.Store({
       const token = session.token
       const thisYearFirst = `${moment(new Date()).format('yyyy')}-01-01`
       const user = {
-        fullName: `${session.user.firstName} ${session.user.lastName}`,
-        _id: session.user._id
+        fullName: session.user
+          ? `${session.user.firstName} ${session.user.lastName}`
+          : '',
+        _id: session.user
+          ? session.user._id
+          : ''
       }
       const clients = []
       const clientNames = collections.Client.map(client => client.clientName).sort()
@@ -238,7 +242,7 @@ export default new Vuex.Store({
       const productTypes = collections.Product.map(product => product.productType)
       const techniciansData = collections.User.filter(user => user.assignable)
       const technicians = []
-      for (let technician of techniciansData) {
+      if (techniciansData.length) for (let technician of techniciansData) {
         const fullName = `${technician.firstName} ${technician.lastName}`
         technicians.push({ text: fullName, value: { fullName, _id: technician._id } })
       }

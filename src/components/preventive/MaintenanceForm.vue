@@ -136,9 +136,6 @@ export default Vue.extend({
       const clientNames = this.hideInactiveClients
         ? this.formOptions.clientsWithContract.map(client => client.clientName)
         : this.collections.Client.map(client => client.clientName)
-      const clientInfo = this.serviceForm.clientName
-        ? this.collections.Client.find(client => client.clientName === this.serviceForm.clientName)
-        : {}
       const officesToFilter = this.hideVisitedOffices
         ? this.formOptions.pendingMaintenance
         : this.collections.Office
@@ -148,17 +145,11 @@ export default Vue.extend({
       const clientOfficeNames = clientOffices !== []
         ? clientOffices.map(x => x.officeName)
         : []
-      let clientProducts = []
-      if (this.serviceForm.clientName) {
-        clientProducts = clientInfo.contracts.find(contract => contract.active).products.map(product => product.productName)
-      } else {
-        clientProducts = []
-      }
       const officeInfo = this.serviceForm.officeName
         ? this.collections.Office.find((office) => office.officeName === this.serviceForm.officeName)
         : {}
       console.log(officeInfo)
-      return { clientNames, clientInfo, clientOfficeNames, clientProducts, officeInfo }
+      return { clientNames, clientOfficeNames, officeInfo }
     }
   },
   methods: {

@@ -178,7 +178,10 @@ export default Vue.extend({
       const clientInfo = this.serviceForm.clientName
         ? this.collections.Client.find(client => client.clientName === this.serviceForm.clientName)
         : {}
-      const clientProducts = clientInfo.contracts.find(contract => contract.active).products.map(product => product.productType)
+      const activeContract = clientInfo.contracts.find(contract => contract.active)
+      const clientProducts = activeContract
+        ? activeContract.products.map(product => product.productType)
+        : this.collections.Product.map(product => product.productType)
       return { clientInfo, clientProducts }
     },
 
