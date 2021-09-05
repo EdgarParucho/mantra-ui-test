@@ -41,7 +41,7 @@
               </v-col>
               <v-divider vertical />
               <v-col :cols="8">
-                <v-form>
+                <v-form autocomplete="off">
                   <v-row justify="start">
                     <v-col :cols="11" align="start">
                       <v-select

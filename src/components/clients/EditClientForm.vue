@@ -207,7 +207,10 @@ export default Vue.extend({
   components: { Header },
   props: ['mobile', 'editing'],
 
-  created () { if (this.editing) this.client = JSON.parse(JSON.stringify(this.editing)) },
+  created () {
+    if (this.editing) this.client = JSON.parse(JSON.stringify(this.editing))
+    console.log(this.editing)
+  },
 
   data: () => ({
     // Form data
@@ -215,7 +218,7 @@ export default Vue.extend({
       clientName: '',
       regions: [],
       contacts: [],
-      contracts: [],
+      contracts: []
     },
     contact: {
       email: '',

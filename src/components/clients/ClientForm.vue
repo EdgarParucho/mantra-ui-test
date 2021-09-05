@@ -363,7 +363,12 @@ export default Vue.extend({
 
   data: () => ({
     // Form data
-    client: { clientName: '', regions: [], contacts: [], contracts: [] },
+    client: {
+      clientName: '',
+      regions: [],
+      contacts: [],
+      contracts: []
+    },
     contract: {
       active: true,
       sla: { local: 0, foreign: 0 },

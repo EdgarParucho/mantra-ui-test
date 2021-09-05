@@ -7,6 +7,7 @@
           v-else
           color="primary"
           border="left"
+          :icon="closable ? null : 'mdi-map-marker'"
           dense
           dark
           :outlined="!closable"

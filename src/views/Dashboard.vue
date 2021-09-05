@@ -1,13 +1,41 @@
 <template>
   <v-container>
-    <Header title="Estado general" subtitle="Indicadores de gestión" />
+    <Header title="Estado general" :subtitle="`Indicadores de gestión - ${thisMonth}`" />
+    <v-alert type="info" icon="mdi-tools" color="primary" dense>
+      Los indicadores de mantenimiento <b>correctivo</b> se contabilizan por reporte o servicio especial.
+    </v-alert>
+    <v-alert type="info" icon="mdi-broom" color="accent" dense>
+      Los indicadores de mantenimiento <b>preventivo</b> se contabilizan por oficina culminada y orden validada.
+    </v-alert>
     <v-row>
-      <v-col :cols="mobile ? 12 : 3">
-        <v-row v-for="card, index in cards" :key="index">
-          <DashboardCard :cardInfo="card" :mobile="mobile" />
-        </v-row>
+      <v-col v-for="card, index in cards" :key="index" :cols="mobile ? 12 : 4">
+        <DashboardCard :cardInfo="card" :mobile="mobile" />
       </v-col>
-      <v-col :cols="mobile ? 12 : 9">
+    </v-row>
+    <v-row>
+      <v-col :cols="mobile ? 12 : 6">
+        <v-sheet class="pa-3" v-if="loading">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph v-else id="dashboardGraph2" :loading="loading" :chartData="servicesXClient" title="Servicios por cliente" :subtitle="thisMonth" />
+      </v-col>
+      <v-col :cols="mobile ? 12 : 6">
+        <v-sheet class="pa-3" v-if="loading">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph v-else id="dashboardGraph1" :loading="loading" :chartData="servicesXTechnician" title="Servicios por técnico" :subtitle="thisMonth" />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
         <v-card>
           <v-card-title>Asignaciones del día</v-card-title>
           <v-chip-group mandatory active-class="primary--text" light>
@@ -28,21 +56,27 @@
 
 <script>
 
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import Header from '@/components/generals/Header'
 import moment from 'moment-timezone'
+import Graph from '@/components/generals/Graph'
 import DashboardCard from '@/components/generals/DashboardCard'
 import QueryResult from '@/components/corrective/QueryResult'
 
 export default {
   name: 'Dashboard',
-  components: { Header, DashboardCard, QueryResult },
+  components: { Header, DashboardCard, QueryResult, Graph },
   
   data:() => ({ showTodays: true }),
 
   computed: {
 
-    ...mapState(['collections']),
+    ...mapState(['collections', 'loading']),
+    ...mapGetters(['formOptions']),
+
+    mobile () {
+      return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'
+    },
 
     cards () {
       return [
@@ -95,10 +129,64 @@ export default {
       return this.collections.Closed.filter(service => service.expired)
     },
 
-    mobile () {
-      return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'
-    }
+    thisMonth () {
+      return moment(new Date()).format('MMMM')
+    },
 
+    corrective () {
+      return [...this.collections.Active, ...this.collections.Closed]
+    },
+
+    servicesXClient () {
+      const type = 'bar'
+      const options = {}
+      const data = {
+        labels: this.formOptions.clients.map(client => client.clientName),
+        datasets: [
+          { label: 'Correctivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary },
+          { label: 'Preventivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.accent }
+        ]
+      }
+      for (const client of this.formOptions.clients) {
+        const clientServices = service => service.clientName === client.clientName
+        data.datasets[0].data.push(this.corrective.filter(clientServices).length)
+      }
+      for (const client of this.formOptions.clients) {
+        const clientServices = office => office.clientName === client.clientName
+        data.datasets[1].data.push(this.finishedMaint.filter(clientServices).length)
+      }
+      return { type, data, options }
+    },
+
+    servicesXTechnician () {
+      const type = 'line'
+      const options = {}
+      const data = {
+        labels: this.formOptions.technicians.map(tech => tech.text),
+        datasets: [
+          { label: 'Correctivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary },
+          { label: 'Preventivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.accent  }
+        ]
+      }
+      for (const technician of this.formOptions.technicians) {
+        const technicianServices = service => service.schedule.technician.fullName === technician.text
+        data.datasets[0].data.push(this.corrective.filter(technicianServices).length)
+      }
+      for (const technician of this.formOptions.technicians) {
+        const technicianServices = office => office.inventory.filter(product => product.schedule.technician.fullName === technician.text).length
+        data.datasets[1].data.push(this.finishedMaint.filter(technicianServices).length)
+      }
+      return { type, data, options }
+    },
+
+    finishedMaint () {
+      const lastMonthFirst = new Date(new Date().getFullYear(), new Date().getMonth() -1, 1)
+      const thisMonthFirst = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+      const afterLastMonth = (office) => moment(office.lastMaintenance).parseZone('America/Caracas').isAfter(lastMonthFirst)
+      const beforeThisMonth = (office) => moment(office.lastMaintenance).parseZone('America/Caracas').isBefore(thisMonthFirst)
+      const main = this.collections.Office.filter(office => afterLastMonth(office) && beforeThisMonth(office))
+      return main
+    }
   }
 
 }

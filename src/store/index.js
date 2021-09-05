@@ -240,7 +240,10 @@ export default new Vuex.Store({
       const clientsWithContract = collections.Client.filter(client => client.contracts.find(contract => contract.active))
       const pendingMaintenance = collections.Office.filter(office => !office.lastMaintenance || office.lastMaintenance < thisYearFirst)
       const productTypes = collections.Product.map(product => product.productType)
-      const techniciansData = collections.User.filter(user => user.assignable)
+      const techniciansData = collections.User.filter(user => user.assignable).sort((a, b) => {
+        if (a.firstName > b.firstName) return 1
+        else return -1
+      })
       const technicians = []
       if (techniciansData.length) for (let technician of techniciansData) {
         const fullName = `${technician.firstName} ${technician.lastName}`
