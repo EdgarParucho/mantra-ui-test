@@ -40,10 +40,9 @@
               Piezas solicitadas: {{ selectedDocument.pieces.length }}
             </div>
             <v-chip
-              :color="selectedDocument.status.includes('Cerrado')
-                ? 'success'
-                : 'light'"
+              :color="colorsXStatus[selectedDocument.status]"
               label
+              dark
               small
             >
               {{ selectedDocument.status }}
@@ -94,7 +93,7 @@
       <v-col>
         <v-alert type="info" icon="mdi-information-outline" rounded="pill" text>
           Acciones registradas
-          </v-alert>
+        </v-alert>
         <v-timeline
           align-top
           reverse
@@ -104,6 +103,8 @@
             v-for="documentation, index in selectedDocument.documentation"
             :key="index"
             fill-dot
+            :color="colorsXStatus[documentation.status]"
+            small
           >
             <v-card class="elevation-2 my-1" outlined color="#eee">
               <v-card-title class="text-h6 text-no-wrap">
@@ -111,7 +112,6 @@
               </v-card-title>
               <v-card-text class="white text--primary">
                 <p>
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus, porro impedit? Accusantium, sed magni quae illum dolore labore itaque aut necessitatibus saepe repellendus facilis iste? Id ad aliquid tempora voluptatem!
                 {{ documentation.observations }}
                 </p>
               </v-card-text>
@@ -188,13 +188,12 @@
                 <v-chip
                   class="ml-1"
                   v-if="documentation.status"
-                  :color="documentation.status.includes('Cerrado')
-                    ? 'success'
-                    : 'light'"
-                    label
-                    x-small
-                  >
-                    {{ documentation.status }}
+                  dark
+                  :color="colorsXStatus[documentation.status]"
+                  label
+                  x-small
+                >
+                  {{ documentation.status }}
                 </v-chip>
               </small>
           </v-timeline-item>
@@ -247,6 +246,17 @@ export default Vue.extend({
       const assignements = this.selectedDocument.documentation.filter(record => record.technician)
       console.log(assignements)
       return assignements.length ? assignements.pop().technician.fullName : 'No asignado'
+    },
+
+    colorsXStatus () {
+      return {
+        "Cerrado - Operativo": this.$vuetify.theme.currentTheme.success,
+        "Cerrado - Reemplazado": this.$vuetify.theme.currentTheme.info,
+        "Cerrado - Desincorporado": this.$vuetify.theme.currentTheme.secondary,
+        "Pendiente - Por repuestos": this.$vuetify.theme.currentTheme.warning,
+        "En programación": this.$vuetify.theme.currentTheme.error,
+        "Atención programada": this.$vuetify.theme.currentTheme.accent
+      }
     }
 
   },

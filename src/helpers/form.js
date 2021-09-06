@@ -36,7 +36,7 @@ module.exports = {
     'Cerrado - Reemplazado',
     'Cerrado - Desincorporado',
     'Pendiente - Por repuestos',
-    'Pendiente - Por visita'
+    'En programación'
   ],
   maintenanceStatus: ['Por culminar', 'Culminado'],
   replacementOptions: [

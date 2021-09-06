@@ -1,10 +1,13 @@
 <template>
   <v-container>
-
     <Header title="Mantenimiento correctivo" subtitle="Bandeja de servicios activos" />
-
-    <v-row>
-      <v-col :cols="mobile ? 12 : 6">
+    <!-- <v-row>
+      <v-col :cols="mobile ? 12 : 3" v-for="card, index in cards" :key="index">
+        <DashboardCard :cardInfo="card" :mobile="mobile" />
+      </v-col>
+    </v-row> -->
+    <v-row justify="space-between">
+      <v-col :cols="mobile ? 12 : 8">
         <v-skeleton-loader v-if="loading" type="image" width="100%" />
 				<v-skeleton-loader v-if="loading" type="image" width="100%" />
 
@@ -17,12 +20,59 @@
         />
 
       </v-col>
+      <v-col :cols="mobile ? 12 : 4">
+        <v-sheet class="pa-3" v-if="loading">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph
+          v-else
+          id="correctiveGraph1"
+          :loading="loading"
+          :chartData="servicesXStatus"
+          title="Estatus de servicios"
+          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      
       <v-col :cols="mobile ? 12 : 6">
-        <v-row v-for="card, index in cards" :key="index">
-          <v-col>
-            <DashboardCard :cardInfo="card" :mobile="mobile" />
-          </v-col>
-        </v-row>
+        <v-sheet class="pa-3" v-if="loading">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph
+          v-else
+          id="correctiveGraph2"
+          :loading="loading"
+          :chartData="servicesXClient"
+          title="Servicios por cliente"
+          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
+        />
+      </v-col>
+      <v-col :cols="mobile ? 12 : 6">
+        <v-sheet class="pa-3" v-if="loading">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph
+          v-else
+          id="correctiveGraph3"
+          :loading="loading"
+          :chartData="servicesXTechnician"
+          title="Servicios por técnico"
+          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
+        />
       </v-col>
     </v-row>
 
@@ -64,18 +114,21 @@
 
 <script>
 // @ is an alias to /src
+import moment from 'moment-timezone'
+import Graph from '@/components/generals/Graph'
 import Header from '@/components/generals/Header'
 import MainButton from '@/components/generals/MainButton'
 import CorrectiveForm from '@/components/corrective/CorrectiveForm'
 import CorrectivePanels from '@/components/corrective/CorrectivePanels'
-import DashboardCard from '@/components/generals/DashboardCard'
+// import DashboardCard from '@/components/generals/DashboardCard'
 import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
 
 export default {
   name: 'Corrective',
   components: {
     CorrectivePanels,
-    DashboardCard,
+    // DashboardCard,
+    Graph,
     Header,
     MainButton,
     CorrectiveForm
@@ -117,12 +170,85 @@ export default {
     cards () {
       return [
         { data: this.collections.Active, title: 'Activos', icon: require('@/assets/svg/dashboard.svg') },
-        { data: this.pendingXSpareParts, title: 'Por repuestos', icon: require('@/assets/svg/gear.svg') }
+        { data: this.pendingXParts, title: 'Por repuestos', icon: require('@/assets/svg/gear.svg') }
       ]
     },
 
-    pendingXSpareParts () {
+    pendingXParts () {
       return this.collections.Active.filter(service => service.status === 'Pendiente - Por repuestos')
+    },
+
+    corrective () {
+      return [...this.collections.Active, ...this.collections.Closed]
+    },
+
+    thisMonth () {
+      return moment(new Date()).format('MMMM')
+    },
+
+    servicesXStatus () {
+      const type = 'polarArea'
+      const options = {
+        plugins: {
+          legend: {
+            // position: 'left'
+          }
+        }
+      }
+      let statusOptions = this.corrective.map(service => service.status)
+      statusOptions = [...new Set(statusOptions)]
+      const data = {
+        labels: statusOptions,
+        datasets: [{ label: 'Correctivo', data: [], backgroundColor: [] }]
+      }
+      for (const status of statusOptions) {
+        data.datasets[0].backgroundColor.push(this.colorsXStatus[status])
+        data.datasets[0].data.push(this.corrective.filter(service => service.status === status).length)
+      }
+      return { type, data, options }
+    },
+
+    colorsXStatus () {
+      return {
+        "Cerrado - Operativo": this.$vuetify.theme.currentTheme.success,
+        "Cerrado - Reemplazado": this.$vuetify.theme.currentTheme.info,
+        "Cerrado - Desincorporado": this.$vuetify.theme.currentTheme.secondary,
+        "Pendiente - Por repuestos": this.$vuetify.theme.currentTheme.warning,
+        "En programación": this.$vuetify.theme.currentTheme.error,
+        "Atención programada": this.$vuetify.theme.currentTheme.accent
+      }
+    },
+    
+    servicesXClient () {
+      const type = 'bar'
+      const options = {}
+      const data = {
+        labels: this.formOptions.clients.map(client => client.clientName),
+        datasets: [
+          { label: 'Servicios por correctivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary },
+        ]
+      }
+      for (const client of this.formOptions.clients) {
+        const clientServices = service => service.clientName === client.clientName
+        data.datasets[0].data.push(this.corrective.filter(clientServices).length)
+      }
+      return { type, data, options }
+    },
+
+    servicesXTechnician () {
+      const type = 'line'
+      const options = {}
+      const data = {
+        labels: this.formOptions.technicians.map(tech => tech.text),
+        datasets: [
+          { label: 'Servicios por correctivo', data: [], borderColor: this.$vuetify.theme.currentTheme.primary },
+        ]
+      }
+      for (const technician of this.formOptions.technicians) {
+        const technicianServices = service => service.schedule.technician.fullName === technician.text
+        data.datasets[0].data.push(this.corrective.filter(technicianServices).length)
+      }
+      return { type, data, options }
     }
 
   },
