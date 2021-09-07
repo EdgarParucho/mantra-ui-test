@@ -2,7 +2,7 @@
   <v-container>
     <Header
       closable="1"
-      title="Formulario de validación"
+      title="Validación"
       subtitle="Mantenimiento preventivo"
       @hideInterface="$emit('hideInterface')"
     />

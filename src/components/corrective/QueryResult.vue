@@ -58,7 +58,11 @@
               <v-list-item
                 v-for="option, index in maintenanceMenu" :key="index"
                 @click="showDialog(option.action, item)"
-                :disabled="item.status !== 'Asignado' && item.status !== 'Por culminar'"
+                :disabled="
+                  (item.status === 'Asignado' && option.title === 'Validar')
+                  || (item.status === 'Culminado' && option.title === 'Re-asignar')
+                  || (item.status === 'Culminado' && option.title === 'Actualizar')
+                "
               >
                 <v-list-item-icon>
                   <v-icon>{{ option.icon }}</v-icon>
@@ -114,6 +118,13 @@
           :mobile="mobile"
           @hideInterface="hideInterface('updateMaintenance')"
         />
+        <MaintenanceValidation
+          v-if="validateMaintenanceInterface"
+          :updating="selectedDocument"
+          :collections="collections"
+          :mobile="mobile"
+          @hideInterface="hideInterface('validateMaintenance')"
+        />
       </v-card>
     </v-dialog>
   </v-container>
@@ -124,6 +135,7 @@
 import CorrectiveSchedule from './CorrectiveSchedule'
 import MaintenanceForm from '@/components/preventive/MaintenanceForm'
 import MaintenanceUpdate from '@/components/preventive/MaintenanceUpdate'
+import MaintenanceValidation from '@/components/preventive/MaintenanceValidation'
 import CorrectiveUpdate from './CorrectiveUpdate'
 import CorrectiveInfo from '@/components/corrective/CorrectiveInfo'
 import moment from 'moment-timezone'
@@ -132,12 +144,13 @@ import { mapState } from 'vuex'
 export default {
   props: ['result', 'xlsFormat', 'mobile'],
   name: 'QueryResult',
-  components: { CorrectiveSchedule, CorrectiveUpdate, CorrectiveInfo, MaintenanceUpdate, MaintenanceForm },
+  components: { CorrectiveSchedule, CorrectiveUpdate, CorrectiveInfo, MaintenanceUpdate, MaintenanceForm, MaintenanceValidation },
   data: () => {
     return {
       scheduleInterface: false,
       scheduleMaintenanceInterface: false,
       updateMaintenanceInterface: false,
+      validateMaintenanceInterface: false,
       updateInterface: false,
       detailsInterface: false,
       tableFilter: '',
@@ -156,7 +169,8 @@ export default {
       ],
       maintenanceMenu: [
         { action: 'scheduleMaintenance', title: 'Re-asignar', icon: 'mdi-account-arrow-left' },
-        { action: 'updateMaintenance', title: 'Actualizar', icon: 'mdi-file-refresh-outline' }
+        { action: 'updateMaintenance', title: 'Actualizar', icon: 'mdi-file-refresh-outline' },
+        { action: 'validateMaintenance', title: 'Validar', icon: 'mdi-check' }
       ],
       dialog: false,
       selectedDocument: {}
@@ -186,6 +200,7 @@ export default {
       return serviceType
     }
   },
+
   methods: {
 
     hideInterface (menu) {

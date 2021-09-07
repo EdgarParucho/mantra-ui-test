@@ -1,11 +1,11 @@
 <template>
   <v-container>
     <Header title="Mantenimiento correctivo" subtitle="Bandeja de servicios activos" />
-    <!-- <v-row>
+    <v-row justify="center">
       <v-col :cols="mobile ? 12 : 3" v-for="card, index in cards" :key="index">
         <DashboardCard :cardInfo="card" :mobile="mobile" />
       </v-col>
-    </v-row> -->
+    </v-row>
     <v-row justify="space-between">
       <v-col :cols="mobile ? 12 : 8">
         <v-skeleton-loader v-if="loading" type="image" width="100%" />
@@ -120,14 +120,14 @@ import Header from '@/components/generals/Header'
 import MainButton from '@/components/generals/MainButton'
 import CorrectiveForm from '@/components/corrective/CorrectiveForm'
 import CorrectivePanels from '@/components/corrective/CorrectivePanels'
-// import DashboardCard from '@/components/generals/DashboardCard'
+import DashboardCard from '@/components/generals/DashboardCard'
 import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
 
 export default {
   name: 'Corrective',
   components: {
     CorrectivePanels,
-    // DashboardCard,
+    DashboardCard,
     Graph,
     Header,
     MainButton,
@@ -188,13 +188,7 @@ export default {
 
     servicesXStatus () {
       const type = 'polarArea'
-      const options = {
-        plugins: {
-          legend: {
-            // position: 'left'
-          }
-        }
-      }
+      const options = {}
       let statusOptions = this.corrective.map(service => service.status)
       statusOptions = [...new Set(statusOptions)]
       const data = {

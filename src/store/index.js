@@ -121,7 +121,7 @@ export default new Vuex.Store({
     getCollection ({ state, commit }, collection) {
       let filter = 'all'
 
-      if (collection === 'Closed') {
+      if (collection === 'Closed' || collection === 'Maintenance') {
         const thisMonthFirst = `${moment(new Date()).format('yyyy-MM')}-01`
         filter = thisMonthFirst
       }
