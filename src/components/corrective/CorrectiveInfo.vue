@@ -11,7 +11,7 @@
         <v-col align="center">
           <v-avatar class="mb-2" color="secondary">
             <v-avatar size="90%" color="white">
-              <v-img src="@/assets/logoMfc.png"></v-img>
+              <v-img src="@/assets/logo.png"></v-img>
             </v-avatar>
           </v-avatar>
         </v-col>

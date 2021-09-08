@@ -40,11 +40,11 @@
         </v-sheet>
         <Graph
           v-else
-          id="clientsGraph1"
+          id="clientsGraph3"
           :loading="loading"
-          :chartData="servicesXClient"
-          title="Servicios por cliente"
-          :subtitle="thisMonth"
+          :chartData="slaXClient"
+          title="S. L. A. Por cliente"
+          :subtitle="`${thisMonth} (Cerrados)`"
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
@@ -57,11 +57,11 @@
         </v-sheet>
         <Graph
           v-else
-          id="clientsGraph3"
+          id="clientsGraph1"
           :loading="loading"
-          :chartData="slaXClient"
-          title="S. L. A. Por cliente"
-          :subtitle="`${thisMonth} (Cerrados)`"
+          :chartData="servicesXClient"
+          title="Servicios por cliente"
+          :subtitle="thisMonth"
         />
       </v-col>
     </v-row>
@@ -150,7 +150,7 @@ export default {
     },
 
     contractStatusXClient () {
-      const type = 'polarArea'
+      const type = 'doughnut'
       const options = {}
       const data = {
         labels: ['Activo', 'Inactivo'],

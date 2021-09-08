@@ -21,14 +21,14 @@
       </v-alert>
       <v-row justify="center">
         <v-col :cols="mobile ? 11 : 5">
-          <v-card :loading="loader" style="opacity:80%;">
+          <v-card style="opacity:80%;">
             <v-card-title>Bienvenido a Mantra</v-card-title>
             <v-card-subtitle>Inicia sesión para continuar</v-card-subtitle>
             <v-row>
               <v-col :cols="4">
                 <v-row>
                   <v-col align="center">
-                    <v-img src="@/assets/logoMfc.png" width="70" />
+                    <v-img src="@/assets/logo.png" width="70" />
                     <v-spacer />
                     <v-btn href="https://instagram.com/microfilmscenter" target="blank" color="primary" icon>
                       <v-icon>mdi-instagram</v-icon>

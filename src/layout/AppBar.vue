@@ -18,7 +18,7 @@
       <v-spacer />
       <v-avatar color="secondary">
         <v-avatar size="90%" color="white">
-          <v-img src="@/assets/logoMfc.png"></v-img>
+          <v-img src="@/assets/logo.png"></v-img>
         </v-avatar>
       </v-avatar>
       <v-spacer></v-spacer>
