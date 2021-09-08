@@ -181,7 +181,7 @@ export default {
       const data = {
         labels: this.formOptions.technicians.map(tech => tech.text),
         datasets: [
-          { label: 'Servicios por preventivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.accent  }
+          { label: 'Servicios por preventivo', data: [], borderColor: this.$vuetify.theme.currentTheme.accent  }
         ]
       }
       for (const technician of this.formOptions.technicians) {

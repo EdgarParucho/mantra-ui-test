@@ -39,7 +39,6 @@
       </v-col>
     </v-row>
     <v-row>
-      
       <v-col :cols="mobile ? 12 : 6">
         <v-sheet class="pa-3" v-if="loading">
           <v-skeleton-loader
