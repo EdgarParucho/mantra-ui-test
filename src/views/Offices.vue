@@ -15,7 +15,21 @@
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
-        <OfficesCards :mobile="mobile" />
+        <v-sheet class="pa-3" v-if="loading">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph
+          v-else
+          id="officesGraph1"
+          :loading="loading"
+          :chartData="officesXClient"
+          title="Oficinas por cliente"
+          subtitle="Según actividad"
+        />
       </v-col>
     </v-row>
 
@@ -39,21 +53,21 @@
 <script>
 
 import { mapState } from 'vuex'
+import Graph from '@/components/generals/Graph'
 import Header from '@/components/generals/Header'
 import MainButton from '@/components/generals/MainButton'
 import OfficePanels from '@/components/offices/OfficePanels.vue'
 import OfficeForm from '@/components/offices/OfficeForm'
-import OfficesCards from '@/components/offices/OfficesCards'
 
 export default {
 
   name: 'Maintenance',
   components: {
+    Graph,
     Header,
     OfficePanels,
     OfficeForm,
-    MainButton,
-    OfficesCards
+    MainButton
   },
 
   data: () => {
@@ -68,7 +82,29 @@ export default {
 
     mobile () {
       return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'
-    }
+    },
+
+    officesXClient () {
+      const labels = this.collections.Client.map(client => client.clientName)
+      const type = 'line'
+      const options = {}
+      const data = {
+        labels,
+        datasets: [
+          { label: 'Activas', data: [], borderColor: this.$vuetify.theme.currentTheme.success },
+          { label: 'Inactivas', data: [], borderColor: this.$vuetify.theme.currentTheme.error }
+        ]
+      }
+      for (const label of labels) {
+        const activeOffices = office => office.clientName === label && office.isActive
+        const inactiveOffices = office => office.clientName === label && !office.isActive
+        data.datasets[0].data.push(this.collections.Office.filter(activeOffices).length)
+        data.datasets[1].data.push(this.collections.Office.filter(inactiveOffices).length)
+      }
+      return { type, data, options }
+    },
+
+
 
   },
 

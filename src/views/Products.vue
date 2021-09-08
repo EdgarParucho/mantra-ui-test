@@ -21,7 +21,7 @@
         </v-sheet>
         <Graph
           v-else
-          id="clientsGraph1"
+          id="productsGraph1"
           :loading="loading"
           :chartData="servicesXProduct"
           title="Servicios por producto"
@@ -29,42 +29,6 @@
         />
       </v-col>
     </v-row>
-    <!-- <v-row>
-      <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
-          <v-skeleton-loader
-            class="mx-auto"
-            max-width="300"
-            type="card"
-          ></v-skeleton-loader>
-        </v-sheet>
-        <Graph
-          v-else
-          id="clientsGraph1"
-          :loading="loading"
-          :chartData="servicesXProduct"
-          title="Servicios por producto"
-          :subtitle="thisMonth"
-        />
-      </v-col>
-      <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
-          <v-skeleton-loader
-            class="mx-auto"
-            max-width="300"
-            type="card"
-          ></v-skeleton-loader>
-        </v-sheet>
-        <Graph
-          v-else
-          id="clientsGraph3"
-          :loading="loading"
-          :chartData="slaXClient"
-          title="S. L. A. Por cliente"
-          :subtitle="`${thisMonth} (Cerrados)`"
-        />
-      </v-col>
-    </v-row> -->
     <MainButton
       @showForm="dialog = true"
       :disabled="$store.state.session.user.userRole > 1"
@@ -91,7 +55,6 @@ import Graph from '@/components/generals/Graph'
 import Header from '@/components/generals/Header'
 import ProductForm from '@/components/products/ProductForm'
 import ProductsPanels from '@/components/products/ProductsPanels'
-// import ProductsCards from '@/components/products/ProductsCards'
 import MainButton from '@/components/generals/MainButton'
 import { mapState, mapGetters } from 'vuex'
 
@@ -101,7 +64,6 @@ export default {
     Graph,
     Header,
     ProductsPanels,
-    // ProductsCards,
     ProductForm,
     MainButton
   },
@@ -156,52 +118,7 @@ export default {
       const fromThisMonth = (service) => moment(service.schedule.scheduledDate).parseZone('America/Caracas').isSameOrAfter(thisMonthFirst)
       const main = this.collections.Maintenance.filter(service => fromThisMonth(service))
       return main
-    },
-
-    contractStatusXClient () {
-      const type = 'doughnut'
-      const options = {}
-      const data = {
-        labels: ['Activo', 'Inactivo'],
-        datasets: [{ label: 'Contrato', data: [], backgroundColor: [] }]
-      }
-      for (const status of data.labels) {
-        const activeContract = client => client.contracts.find(contract => contract.active)
-        const inactiveContract = client => client.contracts.find(contract => !contract.active)
-        data.datasets[0].data.push(this.collections.Client.filter(status === 'Activo' ? activeContract : inactiveContract).length)
-        data.datasets[0].backgroundColor.push(this.colorsXStatus[status])
-      }
-      return { type, data, options }
-    },
-
-    slaXClient () {
-      const type = 'bar'
-      const options = {}
-      const data = {
-        labels: this.formOptions.clients.map(client => client.clientName),
-        datasets: [
-          { label: 'Dentro del acuerdo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.success },
-          { label: 'Fuera del acuerdo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.error }
-        ]
-      }
-      for (const client of this.formOptions.clients) {
-        const inTime = service => !service.itsSpecial && !service.expired && service.clientName === client.clientName
-        data.datasets[0].data.push(this.collections.Closed.filter(inTime).length)
-      }
-      for (const client of this.formOptions.clients) {
-        const expired = service => !service.itsSpecial && service.expired && service.clientName === client.clientName
-        data.datasets[1].data.push(this.collections.Closed.filter(expired).length)
-      }
-      return { type, data, options }
-    },
-
-    colorsXStatus () {
-      return {
-        "Activo": this.$vuetify.theme.currentTheme.success,
-        "Inactivo": this.$vuetify.theme.currentTheme.error
-      }
     }
-
   }
 }
 </script>
