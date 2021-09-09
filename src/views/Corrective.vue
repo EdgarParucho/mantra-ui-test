@@ -10,7 +10,6 @@
       <v-col :cols="mobile ? 12 : 8">
         <v-skeleton-loader v-if="loading" type="image" width="100%" />
 				<v-skeleton-loader v-if="loading" type="image" width="100%" />
-
         <CorrectivePanels
           v-else
           :mobile="mobile"

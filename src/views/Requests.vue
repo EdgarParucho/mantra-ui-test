@@ -1,8 +1,42 @@
 <template>
   <v-container>
-
     <Header title="Solicitudes" subtitle="Gestione la reposición del stock de repuestos" />
-
+    <v-row>
+      <v-col :cols="mobile ? 12 : 6">
+        <v-sheet class="pa-3" v-if="loading">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph
+          v-else
+          id="requestsGraph1"
+          :loading="loading"
+          :chartData="requestsXTechnician"
+          title="Solicitudes por técnicos"
+          subtitle="Activas"
+        />
+      </v-col>
+      <v-col :cols="mobile ? 12 : 6">
+        <v-sheet class="pa-3" v-if="loading">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph
+          v-else
+          id="requestsGraph2"
+          :loading="loading"
+          :chartData="requestsXProduct"
+          title="Solicitudes por productos"
+          subtitle="Activas"
+        />
+      </v-col>
+    </v-row>
     <v-sheet>
       <v-row align="center">
         <v-col class="ml-2" md="3">
@@ -41,15 +75,16 @@
 
 <script>
 
+import Graph from '@/components/generals/Graph'
 import Header from '@/components/generals/Header'
 import RequestDetails from '@/components/storehouse/RequestDetails'
 import moment from 'moment-timezone'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
 
   name: 'Requests',
-  components: { Header, RequestDetails },
+  components: { Graph, Header, RequestDetails },
 
   data: () => {
     return {
@@ -57,7 +92,7 @@ export default {
       headers: [
         { text: 'F. Solicitud', value: 'requestDate' },
         { text: 'Reporte', value: 'reportCode' },
-        { text: 'Técnico', value: 'technician.fullName' },
+        { text: 'Técnico', value: 'technician' },
         { text: 'Cliente', value: 'clientName' },
         { text: 'Oficina', value: 'officeName' },
         { text: 'Acciones', value: 'actions' }
@@ -71,8 +106,13 @@ export default {
 
   computed: {
 
-    ...mapState(['collections']),
+    ...mapState(['collections', 'loading']),
+    ...mapGetters(['formOptions']),
 
+    mobile () {
+      return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'
+    },
+    
     requestPerService () {
       let reports = this.collections.Request.map(f => f.reportCode)
       reports = [...new Set(reports)]
@@ -95,6 +135,40 @@ export default {
         })
       }
       return requestsByReports
+    },
+
+    requestsXTechnician () {
+      const type = 'line'
+      const options = {}
+      const data = {
+        labels: this.formOptions.technicians.map(tech => tech.text),
+        datasets: [
+          { label: 'Solicitudes por técnico', data: [], borderColor: this.$vuetify.theme.currentTheme.primary },
+        ]
+      }
+      for (const technician of this.formOptions.technicians) {
+        const technicianRequests = request => request.technician.fullName === technician.text
+        data.datasets[0].data.push(this.collections.Request.filter(technicianRequests).length)
+      }
+      return { type, data, options }
+    },
+
+    requestsXProduct () {
+      let labels = this.collections.Request.map(request => request.productType)
+      labels = [...new Set(labels)]
+      const type = 'bar'
+      const options = { indexAxis: 'y' }
+      const data = {
+        labels,
+        datasets: [
+          { label: 'Solicitudes por producto', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary },
+        ]
+      }
+      for (const product of labels) {
+        const productRequests = request => request.productType === product
+        data.datasets[0].data.push(this.collections.Request.filter(productRequests).length)
+      }
+      return { type, data, options }
     }
   },
 
