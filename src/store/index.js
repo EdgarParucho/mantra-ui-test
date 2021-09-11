@@ -9,7 +9,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    loading: false,
+    updatingState: false,
     collections: {
       Active: [],
       Client: [],
@@ -40,7 +40,7 @@ export default new Vuex.Store({
     },
 
     toggleLoader (state) {
-      state.loading = !state.loading
+      state.updatingState = !state.updatingState
     },
 
     showSnackbar (state, { error, message }) {
@@ -141,6 +141,7 @@ export default new Vuex.Store({
     },
 
     createDocument ({ state, commit }, { collection, body }) {
+      commit('toggleLoader')
       return new Promise ((resolve, reject) => {
         axios.post(collection, body, { headers: { 'auth-token': state.session.token } })
           .then(({ data }) => {
@@ -154,10 +155,12 @@ export default new Vuex.Store({
             commit('showSnackbar', { error: unhandled }),
             console.error(error)
           ))
+          .finally(() => commit('toggleLoader'))
       })
     },
 
     deleteDocument ({ state, commit }, { collection, body }) {
+      commit('toggleLoader')
       return new Promise ((resolve, reject) => {
         axios.delete(`/${collection}/${body._id}`, { headers: { 'auth-token': state.session.token } })
           .then(({ data }) => {
@@ -171,6 +174,7 @@ export default new Vuex.Store({
             commit('showSnackbar', { error: unhandled }),
             console.error(error)
           ))
+          .finally(() => commit('toggleLoader'))
       })
     },
 

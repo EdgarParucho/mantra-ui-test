@@ -102,6 +102,17 @@
         <v-tab-item>
           <v-sheet>
             <QueryResult :excelFormat="excelFormat" :result="result" />
+            <v-row>
+              <v-col v-for="chart, index in charts" :key="index" :cols="mobile ? 12 : 6">
+                <Graph
+                  v-if="showGraphs"
+                  :id="`dispatchesGraph${index}`"
+                  :title="chart.title"
+                  :chartData="chart.config"
+                  subtitle="Despachos realizados"
+                />
+              </v-col>
+            </v-row>
           </v-sheet>
         </v-tab-item>
       </v-tabs-items>
@@ -110,6 +121,7 @@
 </template>
 <script>
 
+import Graph from '@/components/generals/Graph'
 import Header from '@/components/generals/Header'
 import QueryChips from '@/components/storehouse/QueryChips'
 import QueryResult from '@/components/storehouse/QueryResult'
@@ -118,7 +130,7 @@ import { mapMutations, mapGetters, mapState, mapActions } from 'vuex'
 
 export default {
   name: 'Consultation',
-  components: { Header, QueryChips, QueryResult },
+  components: { Graph, Header, QueryChips, QueryResult },
   data: () => {
     return {
       tab: null,
@@ -129,7 +141,7 @@ export default {
         reference: ''
       },
       excelFormat: [],
-
+      showGraphs: false,
       result: [],
       loader: false
     }
@@ -167,6 +179,209 @@ export default {
       } else{
         return this.collections.Product.map(product => product.productName)
       }
+    },
+    dispatchesXClient () {
+      let labels = this.result.map(dispatch => dispatch.clientName)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Registros por cliente',
+        config: {
+          type: 'line',
+          options: {},
+          data: {
+            labels,
+            datasets: [{
+              label: 'Despachos registrados',
+              data: [],
+              borderColor: this.$vuetify.theme.currentTheme.accent
+            }]
+          }
+        }
+      }
+      for (const client of labels) {
+        const clientDispatches = dispatch => dispatch.clientName === client
+        chart.config.data.datasets[0].data.push(this.result.filter(clientDispatches).length)
+      }
+      return chart
+    },
+
+    costXClient () {
+      let labels = this.result.map(dispatch => dispatch.clientName)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Inversión por cliente',
+        config: {
+          type: 'bar',
+          options: {
+            scales: {
+              y: { ticks: { callback: (value) => '$' + value}}
+            }
+          },
+          data: {
+            labels,
+            datasets: [{
+              label: 'Despachos registrados',
+              data: [],
+              backgroundColor: 'rgba(10, 200, 40, .5)',
+              borderColor: this.$vuetify.theme.currentTheme.primary,
+              borderWidth: 2,
+              borderRadius: 5
+            }]
+          }
+        }
+      }
+      for (const label of labels) {
+        const labelData = this.result.filter(dispatch => dispatch.clientName === label && dispatch.dispatch.cost > 0)
+        let references = labelData.map(item => item.dispatch.reference)
+        references = [...new Set(references)]
+        const dataForSpendings = []
+        for (const reference of references) dataForSpendings.push(labelData.find(item => item.dispatch.reference === reference).dispatch.cost)
+        const labelSpending = dataForSpendings .reduce((a, v) =>  a = a + parseInt(v), 0)
+        chart.config.data.datasets[0].data.push(labelSpending)
+      }
+      return chart
+    },
+
+    dispatchesXProduct () {
+      let labels = this.result.map(dispatch => dispatch.productType)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Despachos por producto',
+        config: {
+          type: 'line',
+          options: { indexAxis: 'y' },
+          data: {
+            labels,
+            datasets: [{
+              label: 'Despachos registrados',
+              data: [],
+              borderColor: this.$vuetify.theme.currentTheme.accent
+            }]
+          }
+        }
+      }
+      for (const label of labels) {
+        const productCorrectives = dispatch => dispatch.productType === label
+        chart.config.data.datasets[0].data.push(this.result.filter(productCorrectives).length)
+      }
+      return chart
+    },
+
+    costXProduct () {
+      let labels = this.result.map(dispatch => dispatch.productType)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Inversión por producto',
+        config: {
+          type: 'bar',
+          options: {
+            scales: {
+              y: { ticks: { callback: (value) => '$' + value}}
+            },
+            indexAxis: 'y'
+          },
+          data: {
+            labels,
+            datasets: [{
+              label: 'Despachos registrados',
+              data: [],
+              backgroundColor: 'rgba(10, 200, 40, .5)',
+              borderColor: this.$vuetify.theme.currentTheme.primary,
+              borderWidth: 2,
+              borderRadius: 5
+            }]
+          }
+        }
+      }
+      for (const label of labels) {
+        const labelData = this.result.filter(dispatch => dispatch.productType === label && dispatch.dispatch.cost > 0)
+        let references = labelData.map(item => item.dispatch.reference)
+        references = [...new Set(references)]
+        const dataForSpendings = []
+        for (const reference of references) dataForSpendings.push(labelData.find(item => item.dispatch.reference === reference).dispatch.cost)
+        console.log(dataForSpendings)
+        const labelSpending = dataForSpendings .reduce((a, v) =>  a = a + parseInt(v), 0)
+        chart.config.data.datasets[0].data.push(labelSpending)
+      }
+      return chart
+    },
+
+    dispatchesXTechnician () {
+      let labels = this.result.map(dispatch => dispatch.technician.fullName)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Registros por técnico',
+        config: {
+          type: 'line',
+          options: {},
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Despachos registrados',
+                data: [],
+                borderColor: this.$vuetify.theme.currentTheme.accent
+              }
+            ]
+          }
+        }
+      }
+      for (const technician of labels) {
+        const technicianDispatches = dispatch => dispatch.technician.fullName === technician
+        chart.config.data.datasets[0].data.push(this.result.filter(technicianDispatches).length)
+      }
+      return chart
+    },
+
+    costXTechnician () {
+      let labels = this.result.map(dispatch => dispatch.technician.fullName)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Inversión por técnico',
+        config: {
+          type: 'bar',
+          options: {
+            scales: {
+              y: { ticks: { callback: (value) => '$' + value}}
+            }
+          },
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Despachos registrados',
+                data: [],
+                backgroundColor: 'rgba(10, 200, 40, .5)',
+                borderColor: this.$vuetify.theme.currentTheme.primary,
+                borderWidth: 2,
+                borderRadius: 5
+              }
+            ]
+          }
+        }
+      }
+      for (const label of labels) {
+        const labelData = this.result.filter(dispatch => dispatch.technician.fullName === label && dispatch.dispatch.cost > 0)
+        let references = labelData.map(item => item.dispatch.reference)
+        references = [...new Set(references)]
+        const dataForSpendings = []
+        for (const reference of references) dataForSpendings.push(labelData.find(item => item.dispatch.reference === reference).dispatch.cost)
+        console.log(dataForSpendings)
+        const labelSpending = dataForSpendings .reduce((a, v) =>  a = a + parseInt(v), 0)
+        chart.config.data.datasets[0].data.push(labelSpending)
+      }
+      return chart
+    },
+
+    charts () {
+      return [
+        this.dispatchesXClient,
+        this.costXClient,
+        this.dispatchesXProduct,
+        this.costXProduct,
+        this.dispatchesXTechnician,
+        this.costXTechnician
+      ]
     }
   },
   methods: {
@@ -209,11 +424,13 @@ export default {
     },
     search (filter) {
       this.loader = true
+      this.showGraphs = false
       this.findDocuments({ collection: 'Dispatch', filter })
         .then((res) => {
           this.result = res
           if (res.length) this.xlsFormat(this.result)
             this.showSnackbar({ message: `Registros encontrados: ${res.length}` })
+            this.showGraphs = true
             this.loader = false
         })
         .catch(() => this.loader = false)

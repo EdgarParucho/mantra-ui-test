@@ -3,8 +3,8 @@
     <Header title="Clientes" subtitle="Administre la información de los clientes" />
     <v-row>
       <v-col :cols="mobile ? 12 : 8">
-        <v-skeleton-loader v-if="loading" type="image" width="100%" />
-				<v-skeleton-loader v-if="loading" type="image" width="100%" />
+        <v-skeleton-loader v-if="updatingState" type="image" width="100%" />
+				<v-skeleton-loader v-if="updatingState" type="image" width="100%" />
         <ClientPanels
           v-else
           :mobile="mobile"
@@ -12,7 +12,7 @@
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 4">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -22,7 +22,7 @@
         <Graph
           v-else
           id="clientsGraph2"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="contractStatusXClient"
           title="Estatus de contratos"
           :subtitle="thisMonth"
@@ -31,7 +31,7 @@
     </v-row>
     <v-row>
       <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -41,14 +41,14 @@
         <Graph
           v-else
           id="clientsGraph3"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="slaXClient"
           title="S. L. A. Por cliente"
           :subtitle="`${thisMonth} (Cerrados)`"
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -58,7 +58,7 @@
         <Graph
           v-else
           id="clientsGraph1"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="servicesXClient"
           title="Servicios por cliente"
           :subtitle="thisMonth"
@@ -68,7 +68,7 @@
     <MainButton
       @showForm="dialog = true"
       :disabled="$store.state.session.user.userRole > 1"
-      :loading="loading"
+      :updatingState="updatingState"
     />
     <v-dialog v-model="dialog" :width="mobile ? '90%' : '60%'" persistent>
       <v-card>
@@ -110,7 +110,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['collections', 'loading']),
+    ...mapState(['collections', 'updatingState']),
     ...mapGetters(['formOptions']),
     mobile () {
       return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'
@@ -171,8 +171,8 @@ export default {
       const data = {
         labels: this.formOptions.clients.map(client => client.clientName),
         datasets: [
-          { label: 'Dentro del acuerdo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.success },
-          { label: 'Fuera del acuerdo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.error }
+          { label: 'Dentro del acuerdo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.success, borderRadius: 5 },
+          { label: 'Fuera del acuerdo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.error, borderRadius: 5 }
         ]
       }
       for (const client of this.formOptions.clients) {

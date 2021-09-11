@@ -1,13 +1,11 @@
 <template>
   <v-container>
-
     <Header
       closable="1"
       title="Asignación"
       subtitle="Registre la fecha y el personal asignado"
       @hideInterface="$emit('hideInterface')"
     />
-
     <v-form ref="form" v-model="assignForm">
       <v-row justify="end">
         <v-col :cols="mobile ? 12 : 9">

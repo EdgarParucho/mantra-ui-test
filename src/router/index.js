@@ -12,7 +12,6 @@ import Products from '../views/Products.vue'
 import Offices from '../views/Offices.vue'
 import Users from '../views/Users.vue'
 import Login from '../views/Login.vue'
-import Stats from '../views/Stats.vue'
 // import store from '../store'
 
 Vue.use(VueRouter)
@@ -80,12 +79,6 @@ const routes = [
     path: '/usuarios',
     name: 'Users',
     component: Users,
-    meta: { adminOnly: true }
-  },
-  {
-    path: '/stats',
-    name: 'Stats',
-    component: Stats,
     meta: { adminOnly: true }
   }
 ]

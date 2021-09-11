@@ -5,8 +5,8 @@
 
     <v-row>
       <v-col :cols="mobile ? 12 : 6">
-        <v-skeleton-loader v-if="loading" type="image" width="100%" />
-				<v-skeleton-loader v-if="loading" type="image" width="100%" />
+        <v-skeleton-loader v-if="updatingState" type="image" width="100%" />
+				<v-skeleton-loader v-if="updatingState" type="image" width="100%" />
         <OfficePanels
           v-else
           :collections="collections"
@@ -15,7 +15,7 @@
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -25,7 +25,7 @@
         <Graph
           v-else
           id="officesGraph1"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="officesXClient"
           title="Oficinas por cliente"
           subtitle="Según actividad"
@@ -33,7 +33,7 @@
       </v-col>
     </v-row>
 
-    <MainButton @showForm="createOffice" :loading="loading" />
+    <MainButton @showForm="createOffice" :updatingState="updatingState" />
 
     <v-dialog :width="mobile ? '90%' : '60%'" persistent v-model="dialog">
       <v-card>
@@ -78,7 +78,7 @@ export default {
 
   computed: {
 
-    ...mapState(['collections', 'loading']),
+    ...mapState(['collections', 'updatingState']),
 
     mobile () {
       return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'

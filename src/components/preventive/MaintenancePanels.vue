@@ -102,7 +102,7 @@ import { mapState, mapMutations, mapGetters } from 'vuex'
 export default {
   name: 'PreventivePanels',
   components: { Header, OfficeInventory, MaintenanceForm },
-  props: ['collections', 'mobile', 'finishedMaintenance'],
+  props: ['collections', 'mobile'],
   data: () => {
     return {
       inventoryInterface: false,
@@ -138,6 +138,18 @@ export default {
   computed: {
     ...mapState(['selectedDocument']),
     ...mapGetters(['formOptions']),
+    visitedThisYear () {
+      const thisYearFirst = new Date(new Date().getFullYear(), 1, 1)
+      const fromThisYear = (office) => moment(office.lastMaintenance).parseZone('America/Caracas').isSameOrAfter(thisYearFirst)
+      const result = this.collections.Office.filter(office => fromThisYear(office))
+      return result
+    },
+    notVisitedThisYear () {
+      const thisYearFirst = new Date(new Date().getFullYear(), 1, 1)
+      const beforeThisYear = (office) => moment(office.lastMaintenance).parseZone('America/Caracas').isBefore(thisYearFirst)
+      const result = this.collections.Office.filter(office => beforeThisYear(office))
+      return result
+    }
   },
   methods: {
     ...mapMutations(['showSnackbar']),
@@ -148,8 +160,8 @@ export default {
 
     showBottomSheet (client, status, subtitle) {
       this.maintenanceData = status === 'finished'
-        ? this.finishedMaintenance.filter(office => office.clientName === client)
-        : this.formOptions.pendingMaintenance.filter(office => office.clientName === client)
+        ? this.visitedThisYear.filter(office => office.clientName === client)
+        : this.notVisitedThisYear.filter(office => office.clientName === client)
       this.bottomSheetTitle = client
       this.bottomSheetSubtitle = subtitle
       this.bottomSheet = true

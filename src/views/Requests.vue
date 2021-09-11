@@ -3,7 +3,7 @@
     <Header title="Solicitudes" subtitle="Gestione la reposición del stock de repuestos" />
     <v-row>
       <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -13,14 +13,14 @@
         <Graph
           v-else
           id="requestsGraph1"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="requestsXTechnician"
           title="Solicitudes por técnicos"
           subtitle="Activas"
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -30,7 +30,7 @@
         <Graph
           v-else
           id="requestsGraph2"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="requestsXProduct"
           title="Solicitudes por productos"
           subtitle="Activas"
@@ -64,7 +64,7 @@
         <template v-slot:item.actions="{ item }">
           <v-btn @click="editItem(item)" color="primary" small>
             <v-icon>
-              mdi-magnify
+              mdi-dots-vertical
             </v-icon>
           </v-btn>
         </template>
@@ -95,6 +95,7 @@ export default {
         { text: 'Técnico', value: 'technician' },
         { text: 'Cliente', value: 'clientName' },
         { text: 'Oficina', value: 'officeName' },
+        { text: 'Producto', value: 'productName' },
         { text: 'Acciones', value: 'actions' }
       ],
       dialog: false,
@@ -106,7 +107,7 @@ export default {
 
   computed: {
 
-    ...mapState(['collections', 'loading']),
+    ...mapState(['collections', 'updatingState']),
     ...mapGetters(['formOptions']),
 
     mobile () {
@@ -161,7 +162,7 @@ export default {
       const data = {
         labels,
         datasets: [
-          { label: 'Solicitudes por producto', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary },
+          { label: 'Solicitudes por producto', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary, borderRadius: 5 },
         ]
       }
       for (const product of labels) {

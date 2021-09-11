@@ -1,8 +1,6 @@
 <template>
   <v-container>
-
     <Header title="Artículos" subtitle="Administre las piezas registradas" />
-
     <v-row align="center">
       <v-col md="3">
         <v-text-field v-model="tableFilter" prepend-inner-icon="mdi-magnify" label="Filtrar" />

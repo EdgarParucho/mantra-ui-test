@@ -86,9 +86,6 @@
           </v-row>
         </v-card>
       </v-menu>
-      <v-chip @click="$emit('submitQuery', { 'documentation.serviceOrder.validated': false })" small>
-        Por validar
-      </v-chip>
     </v-chip-group>
   </v-container>
 </template>

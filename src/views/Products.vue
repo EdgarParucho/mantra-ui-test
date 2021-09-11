@@ -3,8 +3,8 @@
     <Header title="Productos" subtitle="Administre la información de los productos" />
     <v-row>
       <v-col :cols="mobile ? 12 : 6">
-        <v-skeleton-loader v-if="loading" type="image" width="100%" />
-				<v-skeleton-loader v-if="loading" type="image" width="100%" />
+        <v-skeleton-loader v-if="updatingState" type="image" width="100%" />
+				<v-skeleton-loader v-if="updatingState" type="image" width="100%" />
         <ProductsPanels
           v-else
           :mobile="mobile"
@@ -12,7 +12,7 @@
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -22,7 +22,7 @@
         <Graph
           v-else
           id="productsGraph1"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="servicesXProduct"
           title="Servicios por producto"
           :subtitle="thisMonth"
@@ -32,7 +32,7 @@
     <MainButton
       @showForm="dialog = true"
       :disabled="$store.state.session.user.userRole > 1"
-      :loading="loading"
+      :updatingState="updatingState"
     />
     <v-dialog v-model="dialog" :width="mobile ? '90%' : '45%'" persistent>
       <v-card>
@@ -74,7 +74,7 @@ export default {
 
   computed: {
 
-    ...mapState(['collections', 'loading']),
+    ...mapState(['collections', 'updatingState']),
     ...mapGetters(['formOptions']),
 
     mobile () {

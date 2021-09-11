@@ -10,7 +10,6 @@
       <v-stepper-step editable :complete="step > 1" step="1">
         Información básica
       </v-stepper-step>
-
       <v-stepper-content step="1">
         <v-form ref="step1Completed" v-model="step1Completed">
           <v-row>

@@ -1,12 +1,6 @@
 <template>
   <v-container>
     <Header title="Estado general" :subtitle="`Indicadores de gestión - ${thisMonth}`" />
-    <v-alert type="info" icon="mdi-tools" color="primary" dense>
-      Los indicadores de mantenimiento <b>correctivo</b> se contabilizan por reporte o servicio especial.
-    </v-alert>
-    <v-alert type="info" icon="mdi-broom" color="accent" dense>
-      Los indicadores de mantenimiento <b>preventivo</b> se contabilizan por oficina culminada y orden validada.
-    </v-alert>
     <v-row>
       <v-col v-for="card, index in cards" :key="index" :cols="mobile ? 12 : 4">
         <DashboardCard :cardInfo="card" :mobile="mobile" />
@@ -14,24 +8,24 @@
     </v-row>
     <v-row>
       <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
             type="card"
           ></v-skeleton-loader>
         </v-sheet>
-        <Graph v-else id="dashboardGraph2" :loading="loading" :chartData="servicesXClient" title="Servicios por cliente" :subtitle="thisMonth" />
+        <Graph v-else id="dashboardGraph2" :updatingState="updatingState" :chartData="servicesXClient" title="Servicios por cliente" :subtitle="thisMonth" />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
             type="card"
           ></v-skeleton-loader>
         </v-sheet>
-        <Graph v-else id="dashboardGraph1" :loading="loading" :chartData="servicesXTechnician" title="Servicios por técnico" :subtitle="thisMonth" />
+        <Graph v-else id="dashboardGraph1" :updatingState="updatingState" :chartData="servicesXTechnician" title="Servicios por técnico" :subtitle="thisMonth" />
       </v-col>
     </v-row>
     <v-row>
@@ -71,7 +65,7 @@ export default {
 
   computed: {
 
-    ...mapState(['collections', 'loading']),
+    ...mapState(['collections', 'updatingState']),
     ...mapGetters(['formOptions']),
 
     mobile () {
@@ -143,8 +137,8 @@ export default {
       const data = {
         labels: this.formOptions.clients.map(client => client.clientName),
         datasets: [
-          { label: 'Correctivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary },
-          { label: 'Preventivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.accent }
+          { label: 'Correctivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary, borderRadius: 5 },
+          { label: 'Preventivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.accent, borderRadius: 5 }
         ]
       }
       for (const client of this.formOptions.clients) {
@@ -152,8 +146,8 @@ export default {
         data.datasets[0].data.push(this.corrective.filter(clientServices).length)
       }
       for (const client of this.formOptions.clients) {
-        const clientServices = office => office.clientName === client.clientName
-        data.datasets[1].data.push(this.finishedMaint.filter(clientServices).length)
+        const clientServices = service => service.clientName === client.clientName
+        data.datasets[1].data.push(this.collections.Maintenance.filter(clientServices).length)
       }
       return { type, data, options }
     },
@@ -173,19 +167,10 @@ export default {
         data.datasets[0].data.push(this.corrective.filter(technicianServices).length)
       }
       for (const technician of this.formOptions.technicians) {
-        const technicianServices = office => office.inventory.filter(product => product.schedule.technician.fullName === technician.text).length
-        data.datasets[1].data.push(this.finishedMaint.filter(technicianServices).length)
+        const technicianServices = service => service.schedule.technician.fullName === technician.text
+        data.datasets[1].data.push(this.collections.Maintenance.filter(technicianServices).length)
       }
       return { type, data, options }
-    },
-
-    finishedMaint () {
-      const lastMonthFirst = new Date(new Date().getFullYear(), new Date().getMonth() -1, 1)
-      const thisMonthFirst = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-      const afterLastMonth = (office) => moment(office.lastMaintenance).parseZone('America/Caracas').isAfter(lastMonthFirst)
-      const beforeThisMonth = (office) => moment(office.lastMaintenance).parseZone('America/Caracas').isBefore(thisMonthFirst)
-      const main = this.collections.Office.filter(office => afterLastMonth(office) && beforeThisMonth(office))
-      return main
     }
   }
 

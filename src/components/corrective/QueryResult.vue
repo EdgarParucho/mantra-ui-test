@@ -33,11 +33,11 @@
       <template v-slot:item.actions="{ item }">
         <v-menu>
           <template v-slot:activator="{ on }">
-            <v-btn color="primary" small v-on="on">
+            <v-btn :color="item.reportCode ? 'primary' : 'accent'" icon small v-on="on">
               <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
           </template>
-          <v-list color="primary" dark dense>
+          <v-list :color="item.reportCode ? 'primary' : 'accent'" dark dense>
             <v-list-item-group v-if="item.reportCode">
               <v-list-item
                 v-for="option, index in reportsMenu" :key="index"

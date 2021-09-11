@@ -5,7 +5,7 @@
         <v-btn
           class="mb-15 mr-10 gradients"
           :disabled="disabled"
-          :loading="loading"
+          :loading="updatingState"
           v-on="on"
           absolute
           dark
@@ -26,6 +26,6 @@
 <script>
 export default {
   name: 'MainButton',
-  props: ['loading', 'disabled']
+  props: ['updatingState', 'disabled']
 }
 </script>

@@ -1,15 +1,12 @@
 <template>
   <v-container>
-
     <Header
       closable="1"
       title="Eliminar servicio"
       :subtitle="`Código: ${selectedDocument.reportCode}`"
       @hideInterface="$emit('hideInterface')"
     />
-
     <v-alert type="error" dense text>Esta acción es irreversible</v-alert>
-
     <v-form @submit.prevent="deleteService(selectedDocument)" ref="form" v-model="form">
       <v-row justify="center">
         <v-col :cols="mobile ? 12 : 6">

@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <Header title="Usuarios" subtitle="Gestione la información básica" />
-    <v-data-table :items="collections.User" :headers="headers" :loadin="loading">
+    <v-data-table :items="collections.User" :headers="headers" :loading="updatingState">
       <template v-slot:item.role="{ item }">
         {{ item.userRole | roles }}
       </template>
@@ -40,7 +40,7 @@
       </template>
     </v-data-table>
 
-    <MainButton @showForm="signInterface = true" :loading="loading" />
+    <MainButton @showForm="signInterface = true" :updatingState="updatingState" />
 
     <v-dialog :width="mobile ? '90%' : '60%'" persistent v-model="signInterface">
       <v-card>
@@ -88,7 +88,7 @@ export default {
 
   computed: {
 
-    ...mapState(['loading', 'collections']),
+    ...mapState(['updatingState', 'collections']),
 
     mobile () {
       return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'

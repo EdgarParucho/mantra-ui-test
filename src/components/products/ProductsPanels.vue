@@ -9,19 +9,15 @@
               <v-list-item-avatar v-show="!mobile">
                 <v-icon class="grey lighten-1" dark>mdi-label</v-icon>
               </v-list-item-avatar>
-
               <v-list-item-content>
                 <v-list-item-title class="mb-1 font-weight-bold overline">
                   <v-chip outlined label>{{ product.brand }}</v-chip>
                 </v-list-item-title>
-
                 <v-list-item-title class="subheader">
                   {{ product.model }}
                 </v-list-item-title>
               </v-list-item-content>
-
               <v-list-item-action>
-
                 <v-menu>
                   <template v-slot:activator="{ on }">
                     <v-btn icon small v-on="on" :disabled="$store.state.session.user.userRole > 1">

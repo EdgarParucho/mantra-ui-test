@@ -6,38 +6,9 @@
         <DashboardCard :cardInfo="card" :mobile="mobile" />
       </v-col>
     </v-row>
-    <v-row justify="space-between">
-      <v-col :cols="mobile ? 12 : 8">
-        <v-skeleton-loader v-if="loading" type="image" width="100%" />
-				<v-skeleton-loader v-if="loading" type="image" width="100%" />
-        <MaintenancePanels
-          v-else
-          :collections="collections"
-          :mobile="mobile"
-          :finishedMaintenance="finishedMaintenance"
-        />
-      </v-col>
-      <v-col :cols="mobile ? 12 : 4">
-        <v-sheet class="pa-3" v-if="loading">
-          <v-skeleton-loader
-            class="mx-auto"
-            max-width="300"
-            type="card"
-          ></v-skeleton-loader>
-        </v-sheet>
-        <Graph
-          v-else
-          id="preventiveGraph1"
-          :loading="loading"
-          :chartData="servicesXStatus"
-          title="Estatus de servicios"
-          :subtitle="`Mantenimiento preventivo - ${thisMonth}`"
-        />
-      </v-col>
-    </v-row>
     <v-row>
       <v-col>
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -47,14 +18,14 @@
         <Graph
           v-else
           id="preventiveGraph2"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="servicesXClient"
           title="Servicios por cliente"
           :subtitle="`Mantenimiento preventivo - ${thisMonth}`"
         />
       </v-col>
       <v-col>
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -64,15 +35,42 @@
         <Graph
           v-else
           id="preventiveGraph3"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="servicesXTechnician"
           title="Servicios por técnico"
           :subtitle="`Mantenimiento preventivo - ${thisMonth}`"
         />
       </v-col>
     </v-row>
-
-    <MainButton @showForm="dialog = true" :loading="loading" />
+    <v-row justify="space-between">
+      <v-col :cols="mobile ? 12 : 8">
+        <v-skeleton-loader v-if="updatingState" type="image" width="100%" />
+				<v-skeleton-loader v-if="updatingState" type="image" width="100%" />
+        <MaintenancePanels
+          v-else
+          :collections="collections"
+          :mobile="mobile"
+        />
+      </v-col>
+      <v-col :cols="mobile ? 12 : 4">
+        <v-sheet class="pa-3" v-if="updatingState">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph
+          v-else
+          id="preventiveGraph1"
+          :updatingState="updatingState"
+          :chartData="servicesXStatus"
+          title="Estatus de servicios"
+          :subtitle="`Mantenimiento preventivo - ${thisMonth}`"
+        />
+      </v-col>
+    </v-row>
+    <MainButton @showForm="dialog = true" :updatingState="updatingState" />
 
     <v-dialog :width="mobile ? '90%' : '60%'" persistent v-model="dialog">
       <v-card>
@@ -119,7 +117,7 @@ export default {
 
   computed: {
 
-    ...mapState(['collections', 'loading']),
+    ...mapState(['collections', 'updatingState']),
     ...mapGetters(['formOptions']),
 
     mobile () {
@@ -137,7 +135,7 @@ export default {
     servicesXStatus () {
       const type = 'polarArea'
       const options = {}
-      let statusOptions = this.finishedMaintenance.map(service => service.status)
+      let statusOptions = this.collections.Maintenance.map(service => service.status)
       statusOptions = [...new Set(statusOptions)]
       const data = {
         labels: statusOptions,
@@ -145,7 +143,7 @@ export default {
       }
       for (const status of statusOptions) {
         data.datasets[0].backgroundColor.push(this.colorsXStatus[status])
-        data.datasets[0].data.push(this.finishedMaintenance.filter(service => service.status === status).length)
+        data.datasets[0].data.push(this.collections.Maintenance.filter(service => service.status === status).length)
       }
       return { type, data, options }
     },
@@ -165,12 +163,12 @@ export default {
       const data = {
         labels: this.formOptions.clients.map(client => client.clientName),
         datasets: [
-          { label: 'Servicios por preventivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.accent }
+          { label: 'Servicios por preventivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.accent, borderRadius: 5 }
         ]
       }
       for (const client of this.formOptions.clients) {
-        const clientServices = office => office.clientName === client.clientName
-        data.datasets[0].data.push(this.finishedMaintenance.filter(clientServices).length)
+        const clientServices = service => service.clientName === client.clientName
+        data.datasets[0].data.push(this.collections.Maintenance.filter(clientServices).length)
       }
       return { type, data, options }
     },
@@ -185,18 +183,10 @@ export default {
         ]
       }
       for (const technician of this.formOptions.technicians) {
-        const technicianServices = office => office.inventory.filter(product => product.schedule.technician.fullName === technician.text).length
-        data.datasets[0].data.push(this.finishedMaintenance.filter(technicianServices).length)
+        const technicianServices = service => service.schedule.technician.fullName === technician.text
+        data.datasets[0].data.push(this.collections.Maintenance.filter(technicianServices).length)
       }
       return { type, data, options }
-    },
-
-    finishedMaintenance () {
-      const thisMonthFirst = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-      const fromThisMonth = (service) => moment(service.schedule.scheduledDate).parseZone('America/Caracas').isSameOrAfter(thisMonthFirst)
-      const main = this.collections.Maintenance.filter(service => fromThisMonth(service))
-      console.log(main)
-      return main
     },
 
     cards () {

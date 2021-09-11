@@ -1,13 +1,11 @@
 <template>
   <v-container>
-
     <Header
       closable="1"
       title="Historial"
       :subtitle="`Serial: ${relatedServices[0].serialCode}`"
       @hideInterface="$emit('hideInterface')"
     />
-
     <v-timeline :dense="mobile">
       <v-timeline-item
         v-for="(service, i) in orderedServices"

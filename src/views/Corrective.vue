@@ -6,10 +6,46 @@
         <DashboardCard :cardInfo="card" :mobile="mobile" />
       </v-col>
     </v-row>
+    <v-row>
+      <v-col :cols="mobile ? 12 : 6">
+        <v-sheet class="pa-3" v-if="updatingState">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph
+          v-else
+          id="correctiveGraph2"
+          :updatingState="updatingState"
+          :chartData="servicesXClient"
+          title="Servicios por cliente"
+          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
+        />
+      </v-col>
+      <v-col :cols="mobile ? 12 : 6">
+        <v-sheet class="pa-3" v-if="updatingState">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph
+          v-else
+          id="correctiveGraph3"
+          :updatingState="updatingState"
+          :chartData="servicesXTechnician"
+          title="Servicios por técnico"
+          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
+        />
+      </v-col>
+    </v-row>
     <v-row justify="space-between">
       <v-col :cols="mobile ? 12 : 8">
-        <v-skeleton-loader v-if="loading" type="image" width="100%" />
-				<v-skeleton-loader v-if="loading" type="image" width="100%" />
+        <v-skeleton-loader v-if="updatingState" type="image" width="100%" />
+				<v-skeleton-loader v-if="updatingState" type="image" width="100%" />
         <CorrectivePanels
           v-else
           :mobile="mobile"
@@ -20,7 +56,7 @@
 
       </v-col>
       <v-col :cols="mobile ? 12 : 4">
-        <v-sheet class="pa-3" v-if="loading">
+        <v-sheet class="pa-3" v-if="updatingState">
           <v-skeleton-loader
             class="mx-auto"
             max-width="300"
@@ -30,51 +66,15 @@
         <Graph
           v-else
           id="correctiveGraph1"
-          :loading="loading"
+          :updatingState="updatingState"
           :chartData="servicesXStatus"
           title="Estatus de servicios"
           :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
         />
       </v-col>
     </v-row>
-    <v-row>
-      <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
-          <v-skeleton-loader
-            class="mx-auto"
-            max-width="300"
-            type="card"
-          ></v-skeleton-loader>
-        </v-sheet>
-        <Graph
-          v-else
-          id="correctiveGraph2"
-          :loading="loading"
-          :chartData="servicesXClient"
-          title="Servicios por cliente"
-          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
-        />
-      </v-col>
-      <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="loading">
-          <v-skeleton-loader
-            class="mx-auto"
-            max-width="300"
-            type="card"
-          ></v-skeleton-loader>
-        </v-sheet>
-        <Graph
-          v-else
-          id="correctiveGraph3"
-          :loading="loading"
-          :chartData="servicesXTechnician"
-          title="Servicios por técnico"
-          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
-        />
-      </v-col>
-    </v-row>
 
-    <MainButton @showForm="dialog = true" :loading="loading" />
+    <MainButton @showForm="dialog = true" :updatingState="updatingState" />
 
     <v-dialog :width="mobile ? '90%' : '60%'" persistent v-model="dialog">
       <v-card>
@@ -144,7 +144,7 @@ export default {
 
   computed: {
 
-    ...mapState(['collections', 'loading']),
+    ...mapState(['collections', 'updatingState']),
 
     ...mapGetters(['formOptions']),
 
@@ -210,14 +210,14 @@ export default {
         "Atención programada": this.$vuetify.theme.currentTheme.accent
       }
     },
-    
+
     servicesXClient () {
       const type = 'bar'
       const options = {}
       const data = {
         labels: this.formOptions.clients.map(client => client.clientName),
         datasets: [
-          { label: 'Servicios por correctivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary },
+          { label: 'Servicios por correctivo', borderRadius: 5, data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary },
         ]
       }
       for (const client of this.formOptions.clients) {

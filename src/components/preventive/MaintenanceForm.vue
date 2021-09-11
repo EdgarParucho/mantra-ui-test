@@ -148,7 +148,6 @@ export default Vue.extend({
       const officeInfo = this.serviceForm.officeName
         ? this.collections.Office.find((office) => office.officeName === this.serviceForm.officeName)
         : {}
-      console.log(officeInfo)
       return { clientNames, clientOfficeNames, officeInfo }
     }
   },
@@ -175,7 +174,6 @@ export default Vue.extend({
         _id: { "$ne": _id }
       }
       const res = await this.findDocuments({ collection: 'Maintenance' , filter })
-      console.log(res)
       if (!res.length) return false
       else return this.showSnackbar({ error: 'Registrado anteriormente, verifique por cliente y oficina' }), true
     },
@@ -185,7 +183,6 @@ export default Vue.extend({
 
       const registeredBefore = await this.preventDuplicity(newService)
       if (registeredBefore) return this.loader = false
-      console.log(registeredBefore)
       const body = this.completeFields(newService)
 
       if (this.editing) return this.update({ collection: 'Maintenance', body })

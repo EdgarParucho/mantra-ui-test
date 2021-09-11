@@ -14,7 +14,10 @@
 import Chart from 'chart.js/auto'
 export default {
   name: 'Graph',
-  props: ['loading', 'id', 'title', 'subtitle', 'chartData'],
+  props: ['updatingState', 'id', 'title', 'subtitle', 'chartData'],
+  data: () => ({
+    myChart: null
+  }),
   computed: {
     mobile () {
       return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'
@@ -23,23 +26,17 @@ export default {
   methods: {
     createChart (chartId, chartData) {
       const ctx = document.getElementById(chartId)
-      // const myChart = new Chart(ctx, {
-      //   type: typeGr,
-      //   data: chartData.data,
-      //   options: chartData.options
-      // })
-      const myChart = new Chart(ctx, chartData)
-      return myChart
+      this.myChart = new Chart(ctx, chartData)
     }
   },
   watch: {
-    loading: function () {
-      if (this.loading) return
+    updatingState: function () {
+      if (this.updatingState) return
       this.createChart(this.id, this.chartData)
     }
   },
   mounted () {
-    if (this.loading) return
+    if (this.updatingState) return
       this.createChart(this.id, this.chartData)
   }
 }

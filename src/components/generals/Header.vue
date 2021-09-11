@@ -2,7 +2,7 @@
   <div>
     <v-row>
       <v-col>
-        <v-skeleton-loader v-if="loading" type="card" height="40" />
+        <v-skeleton-loader v-if="updatingState" type="card" height="40" />
         <v-alert
           v-else
           color="primary"
@@ -34,7 +34,7 @@ import { mapState } from 'vuex'
 export default {
   name: 'Header',
   props: ['title', 'subtitle', 'closable'],
-  computed: { ...mapState(['loading']) }
+  computed: { ...mapState(['updatingState']) }
 
 }
 </script>

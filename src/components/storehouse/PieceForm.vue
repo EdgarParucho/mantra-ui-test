@@ -1,13 +1,11 @@
 <template>
   <v-container>
-
     <Header
       closable="1"
       title="Formulario de registro"
       subtitle="Complete la información del formulario"
       @hideInterface="$emit('hideInterface')"
     />
-
     <v-card-text>
       <v-form v-model="form" ref="form">
         <v-row>

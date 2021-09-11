@@ -6,7 +6,6 @@
       subtitle="Último mantenimiento"
       @hideInterface="$emit('hideInterface')"
     />
-
     <v-card>
       <v-card-text>
         <v-tabs v-model="tab">

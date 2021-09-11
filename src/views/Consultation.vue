@@ -35,7 +35,14 @@
                     </v-radio-group>
                   </v-col>
                   <v-col align="end">
-                    <v-btn v-show="!tab" class="my-1" @click="clearFilter" :block="mobile" color="accent" small>
+                    <v-btn
+                      v-show="!tab"
+                      class="my-1"
+                      @click="clearFilter"
+                      :block="mobile"
+                      :color="serviceType === 'Correctivo' ? 'primary' : 'accent'"
+                      small
+                    >
                       <v-icon>mdi-broom</v-icon>
                     </v-btn>
                   </v-col>
@@ -144,9 +151,23 @@
           </v-form>
         </v-tab-item>
         <v-tab-item>
-          <v-sheet>
-            <QueryResult :xlsFormat="xlsFormat" :result="result" />
-          </v-sheet>
+          <v-row justify="center" v-if="resultIsCorrective && result.length">
+            <v-col :cols="mobile ? 12 : 3">
+              <DashboardCard :cardInfo="cardInfo" :mobile="mobile" />
+            </v-col>
+          </v-row>
+          <QueryResult :xlsFormat="xlsFormat" :result="result" />
+          <v-row>
+            <v-col v-for="chart, index in charts" :key="index" :cols="mobile ? 12 : 6">
+              <Graph
+                v-if="showGraphs"
+                :id="`consultationGraph${index}`"
+                :title="chart.title"
+                :chartData="chart.config"
+                :subtitle="resultIsCorrective ? 'Correctivo' : 'Preventivo'"
+              />
+            </v-col>
+          </v-row>
         </v-tab-item>
       </v-tabs-items>
     </v-sheet>
@@ -154,6 +175,8 @@
 </template>
 <script>
 
+import DashboardCard from '@/components/generals/DashboardCard'
+import Graph from '@/components/generals/Graph'
 import Header from '@/components/generals/Header'
 import QueryChips from '@/components/corrective/QueryChips'
 import QueryResult from '@/components/corrective/QueryResult'
@@ -163,11 +186,17 @@ import { mapMutations, mapGetters, mapActions } from 'vuex'
 export default {
 
   name: 'Consultation',
-  components: { Header, QueryChips, QueryResult },
+  components: {
+    DashboardCard,
+    Graph,
+    Header,
+    QueryChips,
+    QueryResult
+  },
 
   data: () => {
     return {
-      // Form data
+      showGraphs: true,
       filter: {},
       dateFilter: 'schedule.scheduledDate',
       technician: '',
@@ -177,7 +206,8 @@ export default {
       result: [],
       tab: 0,
       xlsFormat: [],
-      loader: false
+      loader: false,
+      resultIsCorrective: false
     }
   },
 
@@ -187,6 +217,19 @@ export default {
     
     mobile () {
       return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'
+    },
+
+    cardInfo () {
+      const withServiceOrders = this.result.filter(
+        service => service.documentation.find(
+          register => register.serviceOrder && !register.serviceOrder.validated && register.serviceOrder.number !== ''
+        )
+      )
+      return {
+        title: 'Por validar',
+        data: withServiceOrders,
+        icon: require('@/assets/svg/dashboard.svg')
+      }
     },
 
     thisYear () {
@@ -208,6 +251,196 @@ export default {
 
     statusOptions () {
       return ['Cerrado - Operativo', 'Cerrado - Reemplazado', 'Cerrado - Desincorporado']
+    },
+
+    servicesXClient () {
+      let labels = this.result.map(service => service.clientName)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Servicios por cliente',
+        config: {
+          type: 'radar',
+          options: {},
+          data: {
+            labels,
+            datasets: [{
+              label: 'Servicios registrados',
+              data: [],
+              backgroundColor: this.chartColor()
+            }]
+          }
+        }
+      }
+      for (const client of labels) {
+        const clientServices = service => service.clientName === client
+        chart.config.data.datasets[0].data.push(this.result.filter(clientServices).length)
+      }
+      return chart
+    },
+
+    servicesXTechnician () {
+      let labels = this.result.map(service => service.schedule.technician.fullName)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Servicios por técnico',
+        config: {
+          type: 'radar',
+          options: {},
+          data: {
+            labels,
+            datasets: [{ label: 'Servicios registrados', data: [], borderColor: this.chartColor() }]
+          }
+        }
+      }
+      for (const technician of labels) {
+        const technicianServices = service => service.schedule.technician.fullName === technician
+        chart.config.data.datasets[0].data.push(this.result.filter(technicianServices).length)
+      }
+      return chart
+    },
+
+    servicesXProduct () {
+      let labels = this.result.map(service => service.productType)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Servicios por producto',
+        config: {
+          type: 'line',
+          options: { indexAxis: 'y' },
+          data: {
+            labels,
+            datasets: [{
+              label: 'Servicios registrados',
+              data: [],
+              borderColor: this.chartColor()
+            }]
+          }
+        }
+      }
+      for (const label of labels) {
+        const productCorrectives = service => service.productType === label
+        chart.config.data.datasets[0].data.push(this.result.filter(productCorrectives).length)
+      }
+      return chart
+    },
+
+    servicesXState () {
+      let labels = this.result.map(service => service.officeState)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'Servicios por estado',
+        config: {
+          type: 'bar',
+          options: {},
+          data: {
+            labels,
+            datasets: [{
+              label: 'Servicios registrados',
+              data: [],
+              backgroundColor: this.chartColor(),
+              borderRadius: 5
+            }]
+          }
+        }
+      }
+      for (const label of labels) {
+        const productCorrectives = service => service.officeState === label
+        chart.config.data.datasets[0].data.push(this.result.filter(productCorrectives).length)
+      }
+      return chart
+    },
+
+    servicesXMonth () {
+      const labels = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+      const chart = {
+        title: 'Servicios por mes',
+        config: {
+          type: 'line',
+          options: {},
+          data: {
+            labels,
+            datasets: [{ label: 'Fecha de atención', data: [], borderColor: this.chartColor() }]
+          }
+        }
+      }
+      if (this.serviceType === 'Correctivo') chart.config.data.datasets.push(
+        { label: 'Fecha de reporte', data: [], borderColor: this.$vuetify.theme.currentTheme.secondary }
+      )
+      for (const label of labels) {
+        const servicesByReportDate = service => moment(service.reportedAt).format('MMMM') === label
+        const servicesByScheduledDate = service => moment(service.schedule.scheduledDate).format('MMMM') === label
+        chart.config.data.datasets[0].data.push(this.result.filter(servicesByScheduledDate).length)
+        if (this.serviceType === 'Correctivo') chart.config.data.datasets[1].data.push(this.result.filter(servicesByReportDate).length)
+      }
+      return chart
+    },
+
+    slaXClient () {
+      let labels = this.result.map(service => service.clientName)
+      labels = [...new Set(labels)].sort()
+      const chart = {
+        title: 'S. L. A. Por cliente',
+        config: {
+          data: {
+            datasets: [
+              {
+                type: 'bar',
+                label: '% Cumplimiento',
+                data: [],
+                backgroundColor: this.$vuetify.theme.currentTheme.primary,
+                borderRadius: 5
+              },
+              {
+                type: 'line',
+                label: 'Meta',
+                data: [],
+                borderColor: this.$vuetify.theme.currentTheme.secondary
+              },
+              {
+                type: 'line',
+                label: 'Promedio general',
+                data: [],
+                borderColor: '',
+              }
+            ],
+            labels
+          },
+          options: {
+            scales: {
+              y: { ticks: { callback: (value) => '%' + value}}
+            }
+          }
+        }
+      }
+      let generalAverage = 0
+      for (const label of labels) {
+        const clientServices = this.result.filter(service => service.clientName === label && !service.itsSpecial)
+        const slaOk = clientServices.filter(service => !service.expired)
+        const clientAverage = (slaOk.length / clientServices.length) * 100
+        chart.config.data.datasets[0].data.push(clientAverage)
+        chart.config.data.datasets[1].data.push(95)
+        generalAverage = generalAverage + clientAverage
+      }
+      generalAverage = generalAverage / labels.length
+      let counter = 0
+      do {
+        chart.config.data.datasets[2].data.push(generalAverage)
+        counter++
+      } while (counter <= labels.length)
+      chart.config.data.datasets[2].borderColor = (generalAverage >= 95)
+        ? this.$vuetify.theme.currentTheme.success
+        : this.$vuetify.theme.currentTheme.error
+      return chart
+    },
+
+    charts () {
+      const correctiveCharts = [
+        this.servicesXClient, this.servicesXTechnician, this.servicesXProduct, this.servicesXState, this.servicesXMonth, this.slaXClient
+      ]
+      const preventiveCharts = [
+        this.servicesXClient, this.servicesXTechnician, this.servicesXProduct, this.servicesXState
+      ]
+      return this.serviceType === 'Correctivo' ? correctiveCharts : preventiveCharts
     }
 
   },
@@ -217,6 +450,10 @@ export default {
     ...mapActions(['findDocuments']),
     ...mapMutations(['showSnackbar']),
 
+    chartColor () {
+      return this.serviceType === 'Correctivo' ? this.$vuetify.theme.currentTheme.primary : this.$vuetify.theme.currentTheme.accent
+    },
+    
     dateQuickFilter (type) {
       this.dates = []
       let firstDate = `${moment(new Date()).format('yyyy-MM-')}01`
@@ -255,16 +492,20 @@ export default {
     },
 
     searchCorrective (filter) {
+      this.showGraphs = false
       this.loader = true
       Promise.all([
         this.findDocuments({ collection: 'Closed', filter }),
         this.findDocuments({ collection: 'Active', filter })
       ])
         .then((res) => {
+          this.loader = false
           this.result = [...res[0], ...res[1]]
           this.showSnackbar({ message: `Resultados de su búsqueda: ${this.result.length}` })
-          if (this.result.length > 0) this.reportXlsFormat(this.result)
-          this.loader = false
+          if (this.result.length < 1) return
+          this.reportXlsFormat(this.result)
+          this.resultIsCorrective =  true
+          this.showGraphs = true
         })
         .catch(() => this.loader = false)
     },
@@ -276,51 +517,53 @@ export default {
     },
 
     searchInventory (filter) {
+      this.showGraphs = false
       this.loader = true
       filter = this.discardProps(filter)
       console.log(filter)
       this.findDocuments({ collection: 'Inventory', filter })
         .then((res) => {
           this.result = res
-          console.log(res)
           if (this.result.length) this.inventoryXlsFormat(this.result)
           this.showSnackbar({ message:  `Resultados de su búsqueda: ${this.result.length}`}),
+          this.resultIsCorrective =  false
           this.loader = false
+          this.showGraphs = true
         })
         .catch(() => this.loader = false)
     },
 
     reportXlsFormat (data) {
       const rows = []
-      for (const i in data) {
-        const filteredVisits = data[i].documentation.filter(i => i.visit)
+      for (const service of data) {
+        const filteredVisits = service.documentation.filter(i => i.visit)
         const Visitas = filteredVisits.length
         const lasVisit = Visitas ? filteredVisits[Visitas - 1] : null
-        const Documentacion = lasVisit ? lasVisit.observations : data[i].documentation[data[i].documentation.length - 1].observations
+        const Documentacion = lasVisit ? lasVisit.observations : service.documentation[service.documentation.length - 1].observations
         const Fecha_atencion = lasVisit
           ? moment(lasVisit.date).parseZone('America/Caracas').format('L LT')
-          : moment(data[i].schedule.scheduledDate).parseZone('America/Caracas').format('L LT')
+          : moment(service.schedule.scheduledDate).parseZone('America/Caracas').format('L LT')
         const Repuestos = []
-        for (const request of data[i].pieces) Repuestos.push(`${request.pieceName} (${request.quantity})`)
+        for (const request of service.pieces) Repuestos.push(`${request.pieceName} (${request.quantity})`)
         rows.push({
-          Fecha_reporte: moment(data[i].reportedAt).parseZone('America/Caracas').format('L LT'),
+          Fecha_reporte: moment(service.reportedAt).parseZone('America/Caracas').format('L LT'),
           Fecha_atencion,
-          Cliente: data[i].clientName,
-          Oficina: data[i].officeName,
-          Estado: data[i].officeState,
-          Region: data[i].officeRegion,
-          Reporte: data[i].reportCode,
-          Producto: data[i].productName,
-          Serial: data[i].serialCode,
-          Falla: data[i].description,
+          Cliente: service.clientName,
+          Oficina: service.officeName,
+          Estado: service.officeState,
+          Region: service.officeRegion,
+          Reporte: service.reportCode,
+          Producto: service.productName,
+          Serial: service.serialCode,
+          Falla: service.description,
           Documentacion,
-          Status: data[i].status,
-          SLA: data[i].expired ? 'Fuera del acuerdo' : 'Dentro del acuerdo',
-          Tecnico: lasVisit ? lasVisit.technician.fullName : data[i].schedule.technician.fullName,
-          Categoria: data[i].category,
+          Status: service.status,
+          SLA: service.expired ? 'Fuera del acuerdo' : 'Dentro del acuerdo',
+          Tecnico: lasVisit ? lasVisit.technician.fullName : service.schedule.technician.fullName,
+          Categoria: service.category,
           Repuestos,
           Visitas,
-          Zona: data[i].isLocal ? 'Local' : 'Foránea'
+          Zona: service.isLocal ? 'Local' : 'Foránea'
         })
       }
       this.xlsFormat = rows
@@ -329,20 +572,20 @@ export default {
 
     inventoryXlsFormat (data) {
       const rows = []
-      for (const i in data) {
+      for (const service of data) {
         rows.push({
-          Cliente: data[i].clientName,
-          Oficina: data[i].officeName,
-          Estado: data[i].officeState,
-          Region: data[i].officeRegion,
-          Producto: data[i].productName,
-          Serial: data[i].serialCode,
-          Ubicación: data[i].location,
-          Status: data[i].status,
-          Técnico: data[i].schedule.technician.fullName,
-          Fecha_atencion: data[i].schedule.scheduledDate,
-          Orden_servicio: data[i].serviceOrder,
-          Observaciones: data[i].observations
+          Cliente: service.clientName,
+          Oficina: service.officeName,
+          Estado: service.officeState,
+          Region: service.officeRegion,
+          Producto: service.productName,
+          Serial: service.serialCode,
+          Ubicación: service.location,
+          Status: service.status,
+          Técnico: service.schedule.technician.fullName,
+          Fecha_atencion: service.schedule.scheduledDate,
+          Orden_servicio: service.serviceOrder,
+          Observaciones: service.observations
         })
       }
       this.xlsFormat = rows

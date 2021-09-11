@@ -1,19 +1,15 @@
 <template>
   <v-container>
-
     <Header
       closable="1"
       title="Formulario de registro"
       subtitle="Complete la información del servicio"
       @hideInterface="$emit('hideInterface')"
     />
-
     <v-stepper v-model="activeStep" vertical>
-
       <v-stepper-step step="1" editable :complete="step1Completed">
         Origen del servicio
       </v-stepper-step>
-
       <v-stepper-content step="1">
         <v-form @submit.prevent v-model="step1Completed" ref="step1Completed">
           <v-switch class="ml-4" v-model="serviceForm.itsSpecial" label="Servicio especial" />
