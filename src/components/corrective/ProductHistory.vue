@@ -10,7 +10,7 @@
       <v-timeline-item
         v-for="(service, i) in orderedServices"
         :key="i"
-        :color="service.reportCode ? 'primary' : 'secondary'"
+        :color="service.reportCode ? 'primary' : 'accent'"
         small
       >
         <template v-slot:opposite>
@@ -21,7 +21,7 @@
         <div class="py-4">
           <v-chip
             class="mb-4"
-            :color="service.reportCode ? 'primary' : 'secondary'"
+            :color="service.reportCode ? 'primary' : 'accent'"
             label
           >
             {{ service.reportCode ? service.reportCode : 'Mantenimiento' }}
@@ -56,7 +56,7 @@
               {{ service.serviceDate ? service.serviceDate : service.schedule.scheduledDate | dateNoTime }}
             </small>
             <v-chip class="ma-1" small label>
-              {{ service.reportCode ? service.schedule.technician.fullName : service.technician.fullName }}
+              {{ service.schedule.technician.fullName }}
             </v-chip>
           </div>
         </div>

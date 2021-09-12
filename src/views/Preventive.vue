@@ -194,12 +194,12 @@ export default {
         {
           data: this.collections.Maintenance.filter(service => service.status !== 'Culminado'),
           title: 'Asignados',
-          icon: require('@/assets/svg/dashboard.svg')
+          icon: require('@/assets/svg/resume.svg')
         },
         {
           data: this.collections.Maintenance.filter(service => service.status === 'Culminado'),
           title: 'Por validar',
-          icon: require('@/assets/svg/gear.svg')
+          icon: require('@/assets/svg/messages.svg')
         }
       ]
     }

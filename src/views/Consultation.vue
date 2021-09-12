@@ -228,7 +228,7 @@ export default {
       return {
         title: 'Por validar',
         data: withServiceOrders,
-        icon: require('@/assets/svg/dashboard.svg')
+        icon: require('@/assets/svg/messages.svg')
       }
     },
 

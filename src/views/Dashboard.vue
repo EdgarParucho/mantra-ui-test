@@ -74,9 +74,9 @@ export default {
 
     cards () {
       return [
-        { data: this.nextToExpire, title: 'Próximos a vencer', icon: require('@/assets/svg/timer.svg') },
-        { data: this.collections.Closed, title: `Cerrados - ${moment(new Date()).format('MMMM')}` , icon: require('@/assets/svg/file.svg') },
-        { data: this.expiredServices, title: 'Fuera del acuerdo', icon: require('@/assets/svg/sla.svg') }
+        { data: this.nextToExpire, title: 'Próximos a vencer', icon: require('@/assets/svg/reminder.svg') },
+        { data: this.collections.Closed, title: `Cerrados - ${moment(new Date()).format('MMMM')}` , icon: require('@/assets/svg/calendar.svg') },
+        { data: this.expiredServices, title: 'Fuera del acuerdo', icon: require('@/assets/svg/deadline.svg') }
       ]
     },
     

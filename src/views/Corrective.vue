@@ -167,8 +167,8 @@ export default {
 
     cards () {
       return [
-        { data: this.collections.Active, title: 'Activos', icon: require('@/assets/svg/dashboard.svg') },
-        { data: this.pendingXParts, title: 'Por repuestos', icon: require('@/assets/svg/gear.svg') }
+        { data: this.collections.Active, title: 'Activos', icon: require('@/assets/svg/view.svg') },
+        { data: this.pendingXParts, title: 'Por repuestos', icon: require('@/assets/svg/tools.svg') }
       ]
     },
 
