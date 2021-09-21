@@ -114,9 +114,9 @@
                 :items="piecesNames"
                 :disabled="!piecesNames.length"
                 :menu-props="{ nudgeRight: 150 }"
-                hide-no-data
                 label="Piezas requeridas"
                 :error-messages="requiresAssignement"
+                hide-no-data
                 multiple deletable-chips small-chips
                 prepend-inner-icon="mdi-clipboard-list-outline"
               />
@@ -150,9 +150,7 @@
               <v-btn
                 v-if="documentation.visit"
                 :disabled="!step1Completed || !step2Completed"
-                color="primary"
-                text
-                block
+                color="primary" text block
                 @click="activeStep++"
               >
                 Continuar
@@ -236,6 +234,7 @@
 
 <script>
 
+import email from '../../helpers/emails/email'
 import Vue from 'vue'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import moment from 'moment-timezone'
@@ -257,7 +256,7 @@ export default Vue.extend({
     replacementOptions,
     statusOptions,
     rules,
-    
+
     // Vuetify components
     activeStep: 1,
     step1Completed: false,
@@ -341,13 +340,17 @@ export default Vue.extend({
         }
       }
       return requests
+    },
+
+    emailNotification () {
+      return this.collections.Email.find(email => email.subject === 'Solicitud de piezas')
     }
 
   },
 
   methods: {
 
-    ...mapActions(['createDocument', 'updateDocument', 'deleteDocument']),
+    ...mapActions(['createDocument', 'updateDocument', 'deleteDocument', 'sendEmail']),
 
     itIsWeekend (date) {
       const submittedDay = moment(date).format('dddd')
@@ -378,7 +381,7 @@ export default Vue.extend({
       this.loader = true
       if (this.assembledRequests.length) this.requestPieces()
       const body = this.consolidateBody()
-      if (this.documentation.status.includes('Cerrado')) return this.closeService(body)
+      if (this.documentation.status.includes('Cerrado')) this.closeService(body)
       else this.update(body)
     },
 
@@ -418,15 +421,21 @@ export default Vue.extend({
 
     requestPieces () {
       const actions = []
+      const emails = []
       for (const body of this.assembledRequests) {
         let counter = 0
         do {
           counter++
           actions.push(this.createDocument({ collection: 'Request', body }))
         } while (counter < body.quantity)
+        if (!this.emailNotification.enabled) return
+        const addressee = this.collections.User.find(user => user._id === body.technician._id)
+        emails.push(
+          email({ email: this.emailNotification, data: body, author: this.formOptions.user.fullName, addressee })
+        )
       }
+      this.sendEmail(emails)
     }
-
   },
 
   watch: {

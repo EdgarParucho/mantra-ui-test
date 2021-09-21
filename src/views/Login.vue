@@ -139,8 +139,7 @@ export default {
     links: [
       { icon: 'mdi-whatsapp', url: 'https://wa.me/+584142861620' },
       { icon: 'mdi-linkedin', url: 'https://www.linkedin.com/in/edgar-parucho-045769211/?lipi=urn%3Ali%3Apage%3Aprofile_view_index_index%3BHCUWI1GSTqe%2F%2Fbiw922TzQ%3D%3D' },
-      { icon: 'mdi-email', url: 'mailto:parucho.edgar@outlook.es' },
-      { icon: 'mdi-github', url: 'https://github.com/parucho' }
+      { icon: 'mdi-email', url: 'mailto:parucho.edgar@outlook.es' }
     ]
   }),
   computed: {

@@ -108,7 +108,6 @@
           :editing="selectedDocument"
           :collections="collections"
           :mobile="mobile"
-          :pendingMaintenance="pendingMaintenance"
           @hideInterface="hideInterface('scheduleMaintenance')"
         />
         <MaintenanceUpdate

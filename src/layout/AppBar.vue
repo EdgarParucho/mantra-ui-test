@@ -18,7 +18,7 @@
       <v-spacer />
       <v-avatar color="secondary">
         <v-avatar size="90%" color="white">
-          <v-img src="@/assets/logo.png"></v-img>
+          <v-img src="@/assets/logo.png" />
         </v-avatar>
       </v-avatar>
       <v-spacer></v-spacer>
@@ -56,31 +56,50 @@
                 <v-list-item-title>Cambiar contraseña</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item v-if="$session.get('session').user.userRole <= 1" @click="showEmailConfig = true">
+              <v-list-item-icon>
+                <v-icon>mdi-email</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Correos del sistema</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item @click="killSession">
               <v-list-item-icon>
                 <v-icon>mdi-logout</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title>Cerrar sesión</v-list-item-title>
+                <v-list-item-title>Cerrar esta sesión</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list>
         </v-card>
       </v-menu>
-      
+      <v-dialog v-model="showEmailConfig" persistent :width="mobile ? '90%' : '60%'">
+        <v-card>
+          <EmailsConfig v-if="showEmailConfig" @hideInterface="showEmailConfig = false" />
+        </v-card>
+      </v-dialog>
     </v-app-bar>
   </v-container>
 </template>
 
 <script>
 import { mapMutations } from 'vuex'
+import EmailsConfig from '../components/generals/EmailsConfig.vue'
 import AppMenu from './AppMenu.vue'
 export default {
-  components: { AppMenu },
+  components: { AppMenu, EmailsConfig },
   name: 'AppBar',
   data: () => {
     return {
-      drawer: false
+      drawer: false,
+      showEmailConfig: false
+    }
+  },
+  computed: {
+    mobile () {
+      return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'
     }
   },
   methods: {

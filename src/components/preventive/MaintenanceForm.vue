@@ -86,6 +86,7 @@
 
 <script>
 
+import email from '../../helpers/emails/email'
 import Vue from 'vue'
 import { mapMutations, mapGetters, mapActions } from 'vuex'
 import { rules } from '@/helpers/form.js'
@@ -149,10 +150,14 @@ export default Vue.extend({
         ? this.collections.Office.find((office) => office.officeName === this.serviceForm.officeName)
         : {}
       return { clientNames, clientOfficeNames, officeInfo }
+    },
+    emailNotification () {
+      return this.collections.Email.find(email => email.subject === 'Asignación (preventivo)')
     }
+
   },
   methods: {
-    ...mapActions(['createDocument', 'updateDocument', 'findDocuments']),
+    ...mapActions(['createDocument', 'updateDocument', 'findDocuments', 'sendEmail']),
     ...mapMutations(['showSnackbar']),
 
     itIsWeekend (date) {
@@ -185,9 +190,8 @@ export default Vue.extend({
       if (registeredBefore) return this.loader = false
       const body = this.completeFields(newService)
 
-      if (this.editing) return this.update({ collection: 'Maintenance', body })
+      if (this.editing) this.update({ collection: 'Maintenance', body })
       else this.create({ collection: 'Maintenance', body })
-
     },
 
     completeFields (body) {
@@ -196,17 +200,28 @@ export default Vue.extend({
       body.officeState = this.formLists.officeInfo.officeState
       return body
     },
-    
+
     update (document) {
       this.updateDocument(document)
+        .then(() => this.buildEmail(document))
         .then(() => this.$emit('hideInterface'))
-        .catch(() => this.loader = false)
+        .catch((e) => console.log(e), this.loader = false)
     },
-    
+
     create (document) {
       this.createDocument(document)
+        .then(() => this.buildEmail(document))
         .then(() => this.$emit('hideInterface'))
-        .catch(() => this.loader = false)
+        .catch((e) => console.log(e), this.loader = false)
+    },
+
+    buildEmail ({ body }) {
+      if (!this.emailNotification.enabled) return
+      const addressee = this.collections.User.find(user => user._id === body.schedule.technician._id)
+      const notification = email({ email: this.emailNotification, data: body, author: this.formOptions.user.fullName, addressee })
+      this.sendEmail([notification])
+        .then(() => { return })
+        .catch((e) => console.log(e))
     }
 
   },

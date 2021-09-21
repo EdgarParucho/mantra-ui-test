@@ -12,6 +12,8 @@ import Products from '../views/Products.vue'
 import Offices from '../views/Offices.vue'
 import Users from '../views/Users.vue'
 import Login from '../views/Login.vue'
+import Test from '../views/Test.vue'
+
 // import store from '../store'
 
 Vue.use(VueRouter)
@@ -21,6 +23,11 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login
+  },
+  {
+    path: '/test',
+    name: 'Test',
+    component: Test
   },
   {
     path: '/',

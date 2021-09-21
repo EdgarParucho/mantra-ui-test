@@ -49,8 +49,9 @@
 
 <script>
 
+import email from '../../helpers/emails/email'
 import Vue from 'vue'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import Header from '@/components/generals/Header'
 import DateMenu from '@/components/generals/DateMenu'
 import moment from 'moment-timezone'
@@ -83,16 +84,21 @@ export default Vue.extend({
   computed: {
 
     ...mapGetters(['formOptions']),
+    ...mapState(['collections']),
 
     formattedDate () {
       return moment(`${this.dateSubmitted} 08:00`).format('YYYY-MM-DD[T]HH:mm[:00.000+00:00]')
+    },
+
+    emailNotification () {
+      return this.collections.Email.find(email => email.subject === 'Asignación (correctivo)')
     }
 
   },
 
   methods: {
 
-    ...mapActions(['updateDocument']),
+    ...mapActions(['updateDocument', 'sendEmail']),
 
     itIsWeekend (date) {
       return moment(date).format('dddd') === 'sábado' || moment(date).format('dddd') === 'domingo'
@@ -118,6 +124,12 @@ export default Vue.extend({
           status: 'Atención programada'
         }
       })
+        .then(() => {
+          if (!this.emailNotification.enabled) return
+          const addressee = this.collections.User.find(user => user._id === this.schedule.technician._id)
+          const notification = email({ email: this.emailNotification, data: this.selectedDocument, author: this.formOptions.user.fullName, addressee })
+          this.sendEmail([notification])
+        })
         .then(() => this.$emit('hideInterface'))
         .catch(() => this.loader = false)
     },
@@ -137,11 +149,10 @@ export default Vue.extend({
   },
 
   watch: {
-
     dateSubmitted: function () {
       this.friendlyDate = `${moment(this.dateSubmitted).format('dddd, DD [de] MMMM')}`
+      this.schedule.scheduledDate = this.formattedDate
     }
-
   }
 
 })

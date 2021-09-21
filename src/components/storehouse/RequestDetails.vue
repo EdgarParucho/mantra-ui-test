@@ -111,7 +111,7 @@
                   <v-col>
                     <v-select
                       v-model="dispatch.method"
-                      :items="['MRW', 'Entrega personal']"
+                      :items="['Envío', 'Entrega personal']"
                       label="Método"
                       prepend-inner-icon="mdi-truck-fast-outline"
                     />
@@ -202,6 +202,7 @@
 
 <script>
 
+import email from '../../helpers/emails/email'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import Header from '@/components/generals/Header'
 import { rules } from '@/helpers/form'
@@ -280,11 +281,15 @@ export default {
       }
       list = list.map(n => n.pieceName)
       return list
+    },
+    // Reposición de piezas
+    emailNotification () {
+      return this.collections.Email.find(email => email.subject === 'Reposición de piezas')
     }
   },
   methods: {
 
-    ...mapActions(['createDocument', 'deleteDocument']),
+    ...mapActions(['createDocument', 'deleteDocument', 'sendEmail']),
 
     deleteItem (item) {
       confirm('Esta acción es irreversible') && this.confirmDelete(item)
@@ -311,7 +316,23 @@ export default {
     createDispatch (documentsToCreate, documentsToDelete) {
       Promise.all(documentsToCreate)
         .then(() => this.deleteRequest(documentsToDelete))
+        .then(() => {
+          if (!this.emailNotification.enabled) return
+          this.sendEmail([
+            this.emailInfo(this.content)
+          ])
+        })
         .catch(() => this.loading = true)
+    },
+
+    emailInfo (documents) {
+      const data = { ...documents[0], content: {} }
+      for (const item of documents) data.content[item.reportCode] = data.content[item.reportCode]
+        ? data.content[item.reportCode] + `, ${item.pieceName}`
+        : item.pieceName
+      const addressee = this.collections.User.find(user => user._id === this.technician._id)
+      const result = email({ email: this.emailNotification, data, author: this.formOptions.user.fullName, addressee })
+      return result
     },
 
     deleteRequest (documentsToDelete) {

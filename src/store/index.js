@@ -14,6 +14,7 @@ export default new Vuex.Store({
       Active: [],
       Client: [],
       Closed: [],
+      Email: [],
       Maintenance: [],
       Office: [],
       Piece: [],
@@ -222,7 +223,23 @@ export default new Vuex.Store({
             console.error(error)
           ))
       })
+    },
+
+    sendEmail ({ state, commit }, emails) {
+      return new Promise((resolve, reject) => {
+        axios.post('/sendmail', { emails }, { headers: { 'auth-token': state.session.token } })
+          .then(({ data }) => {
+            console.log(data) 
+            if (data.command) {
+              console.log('Save this emails and try resend', emails)
+              reject(commit('showSnackbar', { error: 'Ocurrió un error, el correo no pudo ser enviado' }))
+            }
+            else resolve(commit('showSnackbar', { message: 'Usuario notificado vía correo' }))
+          })
+          .catch((e) => reject(e))
+      })
     }
+
   },
 
   getters: {
@@ -253,6 +270,12 @@ export default new Vuex.Store({
         const fullName = `${technician.firstName} ${technician.lastName}`
         technicians.push({ text: fullName, value: { fullName, _id: technician._id } })
       }
+      const emailAccounts = []
+      if (collections.User.length) for (let user of collections.User) {
+        const text = `${user.firstName} ${user.lastName}`
+        const value = user.email
+        emailAccounts.push({ text, value })
+      }
       let categories = collections.Product.map(product => product.categories)
       function mergeArr(...arr) {
         return arr.reduce((acc, val) => {
@@ -266,6 +289,7 @@ export default new Vuex.Store({
         clients,
         clientNames,
         clientsWithContract,
+        emailAccounts,
         pendingMaintenance,
         productTypes,
         technicians,
