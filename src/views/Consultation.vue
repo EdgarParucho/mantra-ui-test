@@ -351,7 +351,10 @@ export default {
     },
 
     servicesXMonth () {
-      const labels = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+      const labels = [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      ]
       const chart = {
         title: 'Servicios por mes',
         config: {
@@ -419,7 +422,7 @@ export default {
         const clientAverage = (slaOk.length / clientServices.length) * 100
         chart.config.data.datasets[0].data.push(clientAverage)
         chart.config.data.datasets[1].data.push(95)
-        generalAverage = generalAverage + clientAverage
+        generalAverage = clientAverage ? generalAverage + clientAverage : generalAverage
       }
       generalAverage = generalAverage / labels.length
       let counter = 0

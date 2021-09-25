@@ -1,31 +1,9 @@
 <template>
   <v-container>
-    <Header title="Estado general" :subtitle="`Indicadores de gestión - ${thisMonth}`" />
+    <Header title="Inicio" :subtitle="`Estado general del servicio - ${thisYear}`" />
     <v-row>
       <v-col v-for="card, index in cards" :key="index" :cols="mobile ? 12 : 4">
         <DashboardCard :cardInfo="card" :mobile="mobile" />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="updatingState">
-          <v-skeleton-loader
-            class="mx-auto"
-            max-width="300"
-            type="card"
-          ></v-skeleton-loader>
-        </v-sheet>
-        <Graph v-else id="dashboardGraph2" :updatingState="updatingState" :chartData="servicesXClient" title="Servicios por cliente" :subtitle="thisMonth" />
-      </v-col>
-      <v-col :cols="mobile ? 12 : 6">
-        <v-sheet class="pa-3" v-if="updatingState">
-          <v-skeleton-loader
-            class="mx-auto"
-            max-width="300"
-            type="card"
-          ></v-skeleton-loader>
-        </v-sheet>
-        <Graph v-else id="dashboardGraph1" :updatingState="updatingState" :chartData="servicesXTechnician" title="Servicios por técnico" :subtitle="thisMonth" />
       </v-col>
     </v-row>
     <v-row>
@@ -45,6 +23,32 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col :cols="mobile ? 12 : 6">
+        <v-sheet class="pa-3" v-if="updatingState">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph v-else id="dashboardGraph2" :updatingState="updatingState"
+          :chartData="servicesXMonth" title="Servicios por mes" :subtitle="thisMonth"
+        />
+      </v-col>
+      <v-col :cols="mobile ? 12 : 6">
+        <v-sheet class="pa-3" v-if="updatingState">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph v-else id="dashboardGraph1" :updatingState="updatingState"
+          :chartData="servicesXState" title="Servicios por estado" :subtitle="thisMonth"
+        />
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -56,12 +60,13 @@ import moment from 'moment-timezone'
 import Graph from '@/components/generals/Graph'
 import DashboardCard from '@/components/generals/DashboardCard'
 import QueryResult from '@/components/corrective/QueryResult'
+import { states } from '../helpers/form'
 
 export default {
   name: 'Dashboard',
   components: { Header, DashboardCard, QueryResult, Graph },
   
-  data:() => ({ showTodays: true }),
+  data:() => ({ showTodays: true, states }),
 
   computed: {
 
@@ -127,48 +132,50 @@ export default {
       return moment(new Date()).format('MMMM')
     },
 
+    thisYear () {
+      return moment(new Date()).format('YYYY')
+    },
+    
     corrective () {
       return [...this.collections.Active, ...this.collections.Closed]
     },
 
-    servicesXClient () {
+    servicesXMonth () {
+      const labels = [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      ]
       const type = 'bar'
       const options = {}
       const data = {
-        labels: this.formOptions.clients.map(client => client.clientName),
+        labels,
         datasets: [
           { label: 'Correctivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary, borderRadius: 5 },
           { label: 'Preventivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.accent, borderRadius: 5 }
         ]
       }
-      for (const client of this.formOptions.clients) {
-        const clientServices = service => service.clientName === client.clientName
-        data.datasets[0].data.push(this.corrective.filter(clientServices).length)
-      }
-      for (const client of this.formOptions.clients) {
-        const clientServices = service => service.clientName === client.clientName
-        data.datasets[1].data.push(this.collections.Maintenance.filter(clientServices).length)
+      for (const label of labels) {
+        const monthServices = service => moment(service.schedule.scheduledDate).format('MMMM') === label
+        data.datasets[0].data.push(this.corrective.filter(monthServices).length)
+        data.datasets[1].data.push(this.collections.Maintenance.filter(monthServices).length)
       }
       return { type, data, options }
     },
 
-    servicesXTechnician () {
+    servicesXState () {
       const type = 'line'
       const options = {}
       const data = {
-        labels: this.formOptions.technicians.map(tech => tech.text),
+        labels: this.states,
         datasets: [
-          { label: 'Correctivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.primary },
-          { label: 'Preventivo', data: [], backgroundColor: this.$vuetify.theme.currentTheme.accent  }
+          { label: 'Correctivo', data: [], borderColor: this.$vuetify.theme.currentTheme.primary },
+          { label: 'Preventivo', data: [], borderColor: this.$vuetify.theme.currentTheme.accent  }
         ]
       }
-      for (const technician of this.formOptions.technicians) {
-        const technicianServices = service => service.schedule.technician.fullName === technician.text
-        data.datasets[0].data.push(this.corrective.filter(technicianServices).length)
-      }
-      for (const technician of this.formOptions.technicians) {
-        const technicianServices = service => service.schedule.technician.fullName === technician.text
-        data.datasets[1].data.push(this.collections.Maintenance.filter(technicianServices).length)
+      for (const state of data.labels) {
+        const stateServices = service => service.officeState === state
+        data.datasets[0].data.push(this.corrective.filter(stateServices).length)
+        data.datasets[1].data.push(this.collections.Maintenance.filter(stateServices).length)
       }
       return { type, data, options }
     }

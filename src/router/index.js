@@ -12,7 +12,8 @@ import Products from '../views/Products.vue'
 import Offices from '../views/Offices.vue'
 import Users from '../views/Users.vue'
 import Login from '../views/Login.vue'
-import Test from '../views/Test.vue'
+import Technician from '../views/Technician.vue'
+import Technicians from '../views/Technicians.vue'
 
 // import store from '../store'
 
@@ -25,9 +26,9 @@ const routes = [
     component: Login
   },
   {
-    path: '/test',
-    name: 'Test',
-    component: Test
+    path: '/technician/:id',
+    name: 'Technician',
+    component: Technician
   },
   {
     path: '/',
@@ -76,6 +77,11 @@ const routes = [
     path: '/preventivo',
     name: 'Preventive',
     component: Preventive
+  },
+  {
+    path: '/tecnicos',
+    name: 'Technicians',
+    component: Technicians
   },
   {
     path: '/oficinas',

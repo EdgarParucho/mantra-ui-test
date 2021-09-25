@@ -123,8 +123,8 @@ export default new Vuex.Store({
       let filter = 'all'
 
       if (collection === 'Closed' || collection === 'Maintenance') {
-        const thisMonthFirst = `${moment(new Date()).format('yyyy-MM')}-01`
-        filter = thisMonthFirst
+        const thisYearFirst = `${moment(new Date()).format('yyyy')}-01-01`
+        filter = thisYearFirst
       }
 
       return new Promise ((resolve, reject) => {

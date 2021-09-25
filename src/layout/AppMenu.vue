@@ -7,8 +7,8 @@
         link
         :to="option.redirect"
         v-show="
-          option.minRole >= $store.state.session.user.userRole
-          && (!option.onlyFor || option.onlyFor === $store.state.session.user.department)
+          myAccount.userRole <= option.requiredRole
+          && (!option.restrictedTo || myAccount[option.restrictedTo.key] === option.restrictedTo.value)
         "
       >
         <v-list-item-icon>
@@ -24,24 +24,121 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   name: 'AppMenu',
   data () {
-    return {
-      options: [
-        { title: 'Panel', icon: 'mdi-monitor-dashboard', redirect: '/', minRole: 3 },
-        { title: 'Correctivo', icon: 'mdi-tools', redirect: '/correctivo', minRole: 3, onlyFor: 'Operaciones' },
-        { title: 'Preventivo', icon: 'mdi-broom', redirect: '/preventivo', minRole: 3, onlyFor: 'Operaciones' },
-        { title: 'Consultas', icon: 'mdi-folder-search', redirect: '/consultas', minRole: 3, onlyFor: 'Operaciones' },
-        { title: 'Piezas', icon: 'mdi-cog', redirect: '/piezas', minRole: 1 },
-        { title: 'Solicitudes', icon: 'mdi-package-variant', redirect: '/solicitudes', minRole: 3 },
-        { title: 'Despachos', icon: 'mdi-truck', redirect: '/despachos', minRole: 3 },
-        { title: 'Clientes', icon: 'mdi-account-tie', redirect: '/clientes', minRole: 3 },
-        { title: 'Oficinas', icon: 'mdi-bank', redirect: '/oficinas', minRole: 3, onlyFor: 'Operaciones' },
-        { title: 'Productos', icon: 'mdi-printer', redirect: '/productos', minRole: 2 },
-        { title: 'Usuarios', icon: 'mdi-account', redirect: '/usuarios', minRole: 1 }
+    return {}
+  },
+
+  computed: {
+    ...mapState(['session']),
+    myAccount () {
+      return this.session.user
+    },
+    options () {
+      return [
+        {
+          title: 'Dashboard',
+          icon: 'mdi-monitor-dashboard',
+          redirect: '/',
+          requiredRole: 3
+        },
+        {
+          title: 'Mi bandeja',
+          icon: 'mdi-target-account',
+          redirect: `/technician/${this.myAccount._id}`,
+          requiredRole: 3,
+          restrictedTo: {
+            key: 'assignable',
+            value: true
+          }
+        },
+        {
+          title: 'Correctivo',
+          icon: 'mdi-tools',
+          redirect: '/correctivo',
+          requiredRole: 3,
+          restrictedTo: {
+            key: 'department',
+            value: 'Operaciones'
+          }
+        },
+        {
+          title: 'Preventivo',
+          icon: 'mdi-broom',
+          redirect: '/preventivo',
+          requiredRole: 3,
+          restrictedTo: {
+            key: 'department',
+            value: 'Operaciones'
+          }
+        },
+        {
+          title: 'Técnicos',
+          icon: 'mdi-badge-account',
+          redirect: '/tecnicos',
+          requiredRole: 3
+        },
+        {
+          title: 'Consultas',
+          icon: 'mdi-folder-search',
+          redirect: '/consultas',
+          requiredRole: 3,
+          restrictedTo: {
+            key: 'department',
+            value: 'Operaciones'
+          }
+        },
+        {
+          title: 'Piezas',
+          icon: 'mdi-cog',
+          redirect: '/piezas',
+          requiredRole: 1
+        },
+        {
+          title: 'Solicitudes',
+          icon: 'mdi-package-variant',
+          redirect: '/solicitudes',
+          requiredRole: 3
+        },
+        {
+          title: 'Despachos',
+          icon: 'mdi-truck',
+          redirect: '/despachos',
+          requiredRole: 3
+        },
+        {
+          title: 'Clientes',
+          icon: 'mdi-account-tie',
+          redirect: '/clientes',
+          requiredRole: 3
+        },
+        {
+          title: 'Oficinas',
+          icon: 'mdi-bank',
+          redirect: '/oficinas',
+          requiredRole: 3,
+          restrictedTo: {
+            key: 'department',
+            value: 'Operaciones'
+          }
+        },
+        {
+          title: 'Productos',
+          icon: 'mdi-printer',
+          redirect: '/productos',
+          requiredRole: 2
+        },
+        {
+          title: 'Usuarios',
+          icon: 'mdi-account',
+          redirect: '/usuarios',
+          requiredRole: 1
+        }
       ]
     }
   }
+
 }
 </script>

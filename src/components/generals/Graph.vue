@@ -4,7 +4,7 @@
       <v-row>
         <canvas class="pa-3" :id="id" />
       </v-row>
-      <v-card-title>{{ title }}</v-card-title>
+      <v-card-title class="text-no-wrap">{{ title }}</v-card-title>
       <v-card-subtitle>{{ subtitle }}</v-card-subtitle>
     </v-card>
   </v-container>

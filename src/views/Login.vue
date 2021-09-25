@@ -134,7 +134,8 @@ export default {
     users: [
       { text: 'Edgar Parucho (Admin)', value: { idDocument: '20926619', userPassword: '20926619' } },
       { text: 'Samuel Vivas (Usuario - Almacén)', value: { idDocument: '15367598', userPassword: '15367598' } },
-      { text: 'Bryan Sanz (Usuario - Help Desk)', value: { idDocument: '20491189', userPassword: '20491189' } }
+      { text: 'Bryan Sanz (Usuario - Help Desk)', value: { idDocument: '20491189', userPassword: '20491189' } },
+      { text: 'Luis Romer (Usuario - Técnico de campo', value: { idDocument: '5183093', userPassword: '51830930' } }
     ],
     links: [
       { icon: 'mdi-whatsapp', url: 'https://wa.me/+584142861620' },
