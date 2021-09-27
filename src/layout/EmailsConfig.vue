@@ -61,6 +61,7 @@ export default {
     loader: false
   }),
   created () {
+    console.log('created')
     this.copyItems()
   },
   computed: {

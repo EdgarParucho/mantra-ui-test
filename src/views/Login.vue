@@ -135,11 +135,14 @@ export default {
       { text: 'Edgar Parucho (Admin)', value: { idDocument: '20926619', userPassword: '20926619' } },
       { text: 'Samuel Vivas (Usuario - Almacén)', value: { idDocument: '15367598', userPassword: '15367598' } },
       { text: 'Bryan Sanz (Usuario - Help Desk)', value: { idDocument: '20491189', userPassword: '20491189' } },
-      { text: 'Luis Romer (Usuario - Técnico de campo', value: { idDocument: '5183093', userPassword: '51830930' } }
+      { text: 'Luis Romero (Invitado - Técnico de campo)', value: { idDocument: '5183093', userPassword: '51830930' } }
     ],
     links: [
       { icon: 'mdi-whatsapp', url: 'https://wa.me/+584142861620' },
-      { icon: 'mdi-linkedin', url: 'https://www.linkedin.com/in/edgar-parucho-045769211/?lipi=urn%3Ali%3Apage%3Aprofile_view_index_index%3BHCUWI1GSTqe%2F%2Fbiw922TzQ%3D%3D' },
+      {
+        icon: 'mdi-linkedin',
+        url: 'https://www.linkedin.com/in/parucho'
+      },
       { icon: 'mdi-email', url: 'mailto:parucho.edgar@outlook.es' }
     ]
   }),

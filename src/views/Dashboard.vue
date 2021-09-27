@@ -33,7 +33,7 @@
           ></v-skeleton-loader>
         </v-sheet>
         <Graph v-else id="dashboardGraph2" :updatingState="updatingState"
-          :chartData="servicesXMonth" title="Servicios por mes" :subtitle="thisMonth"
+          :chartData="servicesXMonth" title="Servicios por mes" :subtitle="thisYear"
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
@@ -45,7 +45,7 @@
           ></v-skeleton-loader>
         </v-sheet>
         <Graph v-else id="dashboardGraph1" :updatingState="updatingState"
-          :chartData="servicesXState" title="Servicios por estado" :subtitle="thisMonth"
+          :chartData="servicesXState" title="Servicios por estado" :subtitle="thisYear"
         />
       </v-col>
     </v-row>
@@ -80,8 +80,8 @@ export default {
     cards () {
       return [
         { data: this.nextToExpire, title: 'Próximos a vencer', icon: require('@/assets/svg/reminder.svg') },
-        { data: this.collections.Closed, title: `Cerrados - ${moment(new Date()).format('MMMM')}` , icon: require('@/assets/svg/calendar.svg') },
-        { data: this.expiredServices, title: 'Fuera del acuerdo', icon: require('@/assets/svg/deadline.svg') }
+        { data: this.collections.Closed, title: `Cerrados - ${moment(new Date()).format('yyyy')}` , icon: require('@/assets/svg/calendar.svg') },
+        { data: this.expiredServices, title: 'SLA Vencido', icon: require('@/assets/svg/deadline.svg') }
       ]
     },
     
@@ -126,10 +126,6 @@ export default {
 
     expiredServices () {
       return this.collections.Closed.filter(service => service.expired)
-    },
-
-    thisMonth () {
-      return moment(new Date()).format('MMMM')
     },
 
     thisYear () {

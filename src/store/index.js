@@ -24,7 +24,8 @@ export default new Vuex.Store({
     },
     session: { user: null, token: null },
     // App's alert: 
-    snackbar: { activated: false, title: '', message: '', error: '' }
+    snackbar: { activated: false, title: '', message: '', error: '' },
+    failedEmails: []
   },
 
   mutations: {
@@ -79,6 +80,18 @@ export default new Vuex.Store({
       const updated = Object.assign({}, state.collections.Active[index])
       updated.relatedDocuments = relatedDocuments.data
       state.collections.Active.splice(index, 1, updated)
+    },
+
+    logEmails (state, emails) {
+      for (const email of emails) {
+        const alreadyLogged = state.failedEmails.find(item => item.html === email.html)
+        if (!alreadyLogged) state.failedEmails.push(email)
+      }
+      console.log(state.failedEmails)
+    },
+
+    removeEmail (state, index) {
+      state.failedEmails.splice(index, 1)
     }
 
   },
@@ -228,13 +241,16 @@ export default new Vuex.Store({
     sendEmail ({ state, commit }, emails) {
       return new Promise((resolve, reject) => {
         axios.post('/sendmail', { emails }, { headers: { 'auth-token': state.session.token } })
-          .then(({ data }) => {
-            console.log(data) 
-            if (data.command) {
-              console.log('Save this emails and try resend', emails)
+          .then((res) => {
+            console.log(res.data)
+            if (res.data.command) {
+              commit('logEmails', emails)
               reject(commit('showSnackbar', { error: 'Ocurrió un error, el correo no pudo ser enviado' }))
             }
-            else resolve(commit('showSnackbar', { message: 'Usuario notificado vía correo' }))
+            else {
+              commit('logEmails', emails)
+              resolve(commit('showSnackbar', { message: 'Usuario notificado vía correo' }))
+            }
           })
           .catch((e) => reject(e))
       })

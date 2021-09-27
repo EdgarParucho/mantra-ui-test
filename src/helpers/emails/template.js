@@ -1,8 +1,7 @@
 const appLink = 'https://testing-mantra.herokuapp.com'
-const appLogo = "https://drive.google.com/uc?id=12FeTpWAFzoeqoaLYwcNKKYJ92JinrLvY"
 
 const styles = {
-  card: 'padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.3);',
+  card: 'padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);',
   logo: 'box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); margin: 5px; border-radius: 100%; height: 35px; width: 35px;'
 }
 
@@ -30,42 +29,38 @@ const body = ({ ...args }) => {
         <small style="margin-right: 5px;"><b>Gestionado por:</b> ${args.author}</small>
       </div>
     </div>
+    <br>
   `
 }
 
 const notice = `
-  <p>
-    Ante cualquier observación o respuesta en referencia a este correo,
-    por favor contacte al departamento de Help Desk de Microfilms Center.
+  <p>📩 
+    <a href="mailto:helpdeskmc@microfilmscenterjaha.com">Contacta</a>
+    <span> al equipo de Help Desk ante cualquier observación.</span>
+  </p>
+  <p>🔗 
+    <a href="${appLink}">Accede</a>
+    <span> al sistema para más detalles y opciones de gestión.</span>
   </p>
 `
 
 const signature = `
-  <br><br>
-  <p>🔗 <a href="${appLink}">Accede</a> al sistema para más detalles.</p>
+  <br>
   <p>Cordialmente.</p>
   <br>
   <table cellpadding="0" cellspacing="0" class="sc-gPEVay eQYmiW"
     style="vertical-align: -webkit-baseline-middle; font-size: medium; font-family: Arial; min-width: 225px;">
     <tbody>
-      <tr>
-        <td style="text-align: center;">
-          <a href="${appLink}"><img
-            src=${appLogo.minWhite} role="presentation" style="border-radius: 100%;" width="80"
-            class="sc-cHGsZl bHiaRe" style="max-width: 130px; display: inline-block;"></a>
-        </td>
-      </tr>
-      <tr>
-        <td height="10"></td>
-      </tr>
       <tr style="text-align: center;">
         <td>
           <h3 color="#444444" class="sc-fBuWsC eeihxG" style="margin: 0px; font-size: 18px;">
             <span>Mantra</span><span>&nbsp;</span><span>App</span>
           </h3>
           <p color="#444444" font-size="medium" class="sc-fMiknA bxZCMx"
-            style="margin: 0px;font-size: 14px; line-height: 22px;"><span>Sistema de
-              gestión</span></p>
+            style="margin: 0px;font-size: 14px; line-height: 22px;"
+          >
+            <span>Sistema de gestión</span>
+          </p>
         </td>
       </tr>
       <tr>

@@ -25,7 +25,7 @@
           :updatingState="updatingState"
           :chartData="servicesXProduct"
           title="Servicios por producto"
-          :subtitle="thisMonth"
+          :subtitle="thisYear"
         />
       </v-col>
     </v-row>
@@ -83,8 +83,8 @@ export default {
     corrective () {
       return [...this.collections.Active, ...this.collections.Closed]
     },
-    thisMonth () {
-      return moment(new Date()).format('MMMM')
+    thisYear () {
+      return moment(new Date()).format('yyyy')
     },
     servicesXProduct () {
       let labels = this.collections.Product.map(product => product.productType)
@@ -102,7 +102,8 @@ export default {
         const productCorrectives = service => service.productType === label
         data.datasets[0].data.push(this.corrective.filter(productCorrectives).length)
         const productPreventives = service => service.inventory.find(product => product.productType === label)
-        const productServices = this.finishedMaintenance.filter(productPreventives)
+        const closedMaintenances = this.collections.Maintenance.filter(service => service.status !== 'Asignado')
+        const productServices = closedMaintenances.filter(productPreventives)
         let productQuantity = 0
         console.log(productServices)
         for (const service of productServices) {
@@ -111,13 +112,6 @@ export default {
         data.datasets[1].data.push(productQuantity)
       }
       return { type, data, options }
-    },
-
-    finishedMaintenance () {
-      const thisMonthFirst = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-      const fromThisMonth = (service) => moment(service.schedule.scheduledDate).parseZone('America/Caracas').isSameOrAfter(thisMonthFirst)
-      const main = this.collections.Maintenance.filter(service => fromThisMonth(service))
-      return main
     }
   }
 }

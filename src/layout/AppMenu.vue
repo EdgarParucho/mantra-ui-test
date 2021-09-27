@@ -1,26 +1,28 @@
 <template>
-  <v-container>
-    <v-list color="hsla(140, 45%, 55%, .3)" dark dense nav elevation="1">
-      <v-list-item
-        v-for="option in options"
-        :key="option.title"
-        link
-        :to="option.redirect"
-        v-show="
-          myAccount.userRole <= option.requiredRole
-          && (!option.restrictedTo || myAccount[option.restrictedTo.key] === option.restrictedTo.value)
-        "
-      >
-        <v-list-item-icon>
-          <v-icon>{{ option.icon }}</v-icon>
-        </v-list-item-icon>
+  <div>
+    <v-card class="gradients" width="256">
+      <v-list color="hsla(140, 45%, 55%, .3)" dark dense nav elevation="1">
+        <v-list-item
+          v-for="option in options"
+          :key="option.title"
+          link
+          :to="option.redirect"
+          v-show="
+            myAccount.userRole <= option.requiredRole
+            && (!option.restrictedTo || myAccount[option.restrictedTo.key] === option.restrictedTo.value)
+          "
+        >
+          <v-list-item-icon>
+            <v-icon>{{ option.icon }}</v-icon>
+          </v-list-item-icon>
 
-        <v-list-item-content>
-          <v-list-item-title>{{ option.title }}</v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-    </v-list>
-  </v-container>
+          <v-list-item-content>
+            <v-list-item-title>{{ option.title }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-card>
+  </div>
 </template>
 
 <script>

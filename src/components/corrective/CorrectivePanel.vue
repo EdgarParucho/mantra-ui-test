@@ -87,7 +87,7 @@
                 <v-list-item
                   v-for="option, index in actionsMenu" :key="index"
                   @click="showInterface(option.action, service)"
-                  :disabled="option.minRole < $store.state.session.user.userRole"
+                  :disabled="option.requiredRole < $store.state.session.user.userRole"
                 >
                   <v-list-item-icon>
                     <v-icon>{{ option.icon }}</v-icon>
@@ -204,10 +204,10 @@ export default {
       dialog: false,
 
       actionsMenu: [
-        { action: 'schedule', title: 'Asignar', icon: 'mdi-account-arrow-left', minRole: 2 },
-        { action: 'update', title: 'Actualizar', icon: 'mdi-file-refresh-outline', minRole: 2 },
-        { action: 'edit', title: 'Editar', icon: 'mdi-file-document-edit-outline', minRole: 2 },
-        { action: 'delete', title: 'Eliminar', icon: 'mdi-delete', minRole: 1 }
+        { action: 'schedule', title: 'Asignar', icon: 'mdi-account-arrow-left', requiredRole: 2 },
+        { action: 'update', title: 'Actualizar', icon: 'mdi-file-refresh-outline', requiredRole: 2 },
+        { action: 'edit', title: 'Editar', icon: 'mdi-file-document-edit-outline', requiredRole: 2 },
+        { action: 'delete', title: 'Eliminar', icon: 'mdi-delete', requiredRole: 1 }
       ],
       selectedDocument: {},
       selectedServiceRelated: []

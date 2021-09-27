@@ -12,7 +12,7 @@
           ></v-skeleton-loader>
         </v-sheet>
         <Graph v-else id="techniciansGraph1" :updatingState="updatingState"
-          :chartData="productsPerTechnician" title="Productos atendidos" :subtitle="`Atenciones (${thisYear})`"
+          :chartData="productsPerTechnician" title="Productos atendidos" :subtitle="`Atenciones - ${thisYear}`"
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
@@ -24,7 +24,7 @@
           ></v-skeleton-loader>
         </v-sheet>
         <Graph v-else id="techniciansGraph2" :updatingState="updatingState"
-          :chartData="servicesPerState" title="Productos por estado" :subtitle="`Atenciones (${thisYear})`"
+          :chartData="servicesPerState" title="Productos por estado" :subtitle="`Atenciones - ${thisYear}`"
         />
       </v-col>
     </v-row>
@@ -67,7 +67,7 @@
           ></v-skeleton-loader>
         </v-sheet>
         <Graph v-else id="techniciansGraph3" :updatingState="updatingState"
-          :chartData="oneVisitAverage" title="Efectividad en 1era visita" :subtitle="`Atenciones (${thisYear})`"
+          :chartData="oneVisitAverage" title="Efectividad en 1era visita" :subtitle="`Atenciones - ${thisYear}`"
         />
       </v-col>
     </v-row>

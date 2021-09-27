@@ -42,7 +42,10 @@
               <v-list-item
                 v-for="option, index in reportsMenu" :key="index"
                 @click="showDialog(option.action, item)"
-                :disabled="item.status.includes('Cerrado') && option.action !== 'details'"
+                :disabled="
+                  item.status.includes('Cerrado') && option.action !== 'details'
+                  || (option.requiredRole < $store.state.session.user.userRole)
+                "
               >
                 <v-list-item-icon>
                   <v-icon>{{ option.icon }}</v-icon>
@@ -62,6 +65,7 @@
                   (item.status === 'Asignado' && option.title === 'Validar')
                   || (item.status === 'Culminado' && option.title === 'Re-asignar')
                   || (item.status === 'Culminado' && option.title === 'Actualizar')
+                  || (option.requiredRole < $store.state.session.user.userRole)
                 "
               >
                 <v-list-item-icon>
@@ -124,6 +128,12 @@
           :mobile="mobile"
           @hideInterface="hideInterface('validateMaintenance')"
         />
+        <OfficeInventory
+          v-if="inventoryInterface"
+          :mobile="mobile"
+          :inventory="selectedInventory"
+          @hideInterface="hideInterface('inventory')"
+        />
       </v-card>
     </v-dialog>
   </v-container>
@@ -137,22 +147,25 @@ import MaintenanceUpdate from '@/components/preventive/MaintenanceUpdate'
 import MaintenanceValidation from '@/components/preventive/MaintenanceValidation'
 import CorrectiveUpdate from './CorrectiveUpdate'
 import CorrectiveInfo from '@/components/corrective/CorrectiveInfo'
+import OfficeInventory from '@/components/preventive/OfficeInventory'
 import moment from 'moment-timezone'
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   props: ['result', 'xlsFormat', 'mobile'],
   name: 'QueryResult',
-  components: { CorrectiveSchedule, CorrectiveUpdate, CorrectiveInfo, MaintenanceUpdate, MaintenanceForm, MaintenanceValidation },
+  components: { CorrectiveSchedule, CorrectiveUpdate, CorrectiveInfo, MaintenanceUpdate, MaintenanceForm, MaintenanceValidation, OfficeInventory },
   data: () => {
     return {
       scheduleInterface: false,
       scheduleMaintenanceInterface: false,
       updateMaintenanceInterface: false,
       validateMaintenanceInterface: false,
+      inventoryInterface: false,
       updateInterface: false,
       detailsInterface: false,
       tableFilter: '',
+      selectedInventory: [],
       headers: [
         { text: 'Cliente', value: 'clientName' },
         { text: 'Oficina', value: 'officeName' },
@@ -162,14 +175,15 @@ export default {
         { text: 'Acciones', value: 'actions' }
       ],
       reportsMenu: [
-        { action: 'details', title: 'Detalles', icon: 'mdi-information-outline' },
-        { action: 'schedule', title: 'Re-asignar', icon: 'mdi-account-arrow-left' },
-        { action: 'update', title: 'Actualizar', icon: 'mdi-file-refresh-outline' }
+        { action: 'details', title: 'Detalles', icon: 'mdi-information-outline', requiredRole: 3 },
+        { action: 'schedule', title: 'Re-asignar', icon: 'mdi-account-arrow-left', requiredRole: 2 },
+        { action: 'update', title: 'Actualizar', icon: 'mdi-file-refresh-outline', requiredRole: 2 }
       ],
       maintenanceMenu: [
-        { action: 'scheduleMaintenance', title: 'Re-asignar', icon: 'mdi-account-arrow-left' },
-        { action: 'updateMaintenance', title: 'Actualizar', icon: 'mdi-file-refresh-outline' },
-        { action: 'validateMaintenance', title: 'Validar', icon: 'mdi-check' }
+        { action: 'inventory', title: 'Buscar inventario', icon: 'mdi-file-search', requiredRole: 3 },
+        { action: 'scheduleMaintenance', title: 'Re-asignar', icon: 'mdi-account-arrow-left', requiredRole: 2 },
+        { action: 'updateMaintenance', title: 'Actualizar', icon: 'mdi-file-refresh-outline', requiredRole: 2 },
+        { action: 'validateMaintenance', title: 'Validar', icon: 'mdi-check', requiredRole: 2 }
       ],
       dialog: false,
       selectedDocument: {}
@@ -201,6 +215,7 @@ export default {
   },
 
   methods: {
+    ...mapMutations(['showSnackbar']),
 
     hideInterface (menu) {
       this.selectedDocument = {}
@@ -209,9 +224,16 @@ export default {
     },
 
     showDialog (menu, service) {
+      if (menu === 'inventory') return this.showInventory(service.officeName, service.clientName)
       this.selectedDocument = Object.assign({}, service)
       this.dialog = true
       this[`${menu}Interface`] = true
+    },
+
+    showInventory (officeName, clientName) {
+      this.selectedInventory = this.collections.Office.find(office => office.officeName === officeName && office.clientName === clientName).inventory
+      if (!this.selectedInventory.length) return this.showSnackbar({ message: 'El inventario no se ha registrado aún' })
+      else this.dialog = true, this.inventoryInterface = true
     }
 
   }

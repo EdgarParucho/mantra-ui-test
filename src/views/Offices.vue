@@ -33,7 +33,7 @@
       </v-col>
     </v-row>
 
-    <MainButton @showForm="createOffice" :updatingState="updatingState" />
+    <MainButton @showForm="createOffice" :disabled="$store.state.session.user.userRole > 2" :updatingState="updatingState" />
 
     <v-dialog :width="mobile ? '90%' : '60%'" persistent v-model="dialog">
       <v-card>

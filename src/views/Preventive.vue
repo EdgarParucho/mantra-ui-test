@@ -21,7 +21,7 @@
           :updatingState="updatingState"
           :chartData="servicesXClient"
           title="Servicios por cliente"
-          :subtitle="`Mantenimiento preventivo - ${thisMonth}`"
+          :subtitle="`Mantenimiento preventivo - ${thisYear}`"
         />
       </v-col>
       <v-col>
@@ -38,7 +38,7 @@
           :updatingState="updatingState"
           :chartData="servicesXTechnician"
           title="Servicios por técnico"
-          :subtitle="`Mantenimiento preventivo - ${thisMonth}`"
+          :subtitle="`Mantenimiento preventivo - ${thisYear}`"
         />
       </v-col>
     </v-row>
@@ -66,11 +66,11 @@
           :updatingState="updatingState"
           :chartData="servicesXStatus"
           title="Estatus de servicios"
-          :subtitle="`Mantenimiento preventivo - ${thisMonth}`"
+          :subtitle="`Mantenimiento preventivo - ${thisYear}`"
         />
       </v-col>
     </v-row>
-    <MainButton @showForm="dialog = true" :updatingState="updatingState" />
+    <MainButton @showForm="dialog = true" :disabled="$store.state.session.user.userRole > 2" :updatingState="updatingState" />
 
     <v-dialog :width="mobile ? '90%' : '60%'" persistent v-model="dialog">
       <v-card>
@@ -128,8 +128,8 @@ export default {
       return `${moment(new Date()).format('yyyy')}-01-01`
     },
 
-    thisMonth () {
-      return moment(new Date()).format('MMMM')
+    thisYear () {
+      return moment(new Date()).format('yyyy')
     },
 
     servicesXStatus () {
@@ -192,7 +192,7 @@ export default {
     cards () {
       return [
         {
-          data: this.collections.Maintenance.filter(service => service.status !== 'Culminado'),
+          data: this.collections.Maintenance.filter(service => service.status !== 'Culminado' && service.status !== 'Validado'),
           title: 'Asignados',
           icon: require('@/assets/svg/resume.svg')
         },

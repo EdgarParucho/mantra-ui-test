@@ -150,7 +150,10 @@ export default {
       const reportNotValidated = service => service.documentation.find(
         register => register.serviceOrder && !register.serviceOrder.validated && register.serviceOrder.number !== ''
       )
-      const actives = this.collections.Active.filter(filterByUser)
+      const activeReports = this.collections.Active.filter(filterByUser)
+      const activeMaintenances = this.collections.Maintenance.filter(service => service.schedule.technician._id === this.$route.params.id
+        && service.status !== 'Validado' && service.status !== 'Culminado')
+      const actives = [...activeReports, ...activeMaintenances]
       const maintenances = this.collections.Maintenance.filter(filterByUser)
       const closeds = this.collections.Closed.filter(filterByUser)
       const notValidated = [

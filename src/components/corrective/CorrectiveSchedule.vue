@@ -112,7 +112,7 @@ export default Vue.extend({
           `Servicio asignado a ${this.schedule.technician.fullName}, fecha estimada de atención: ${this.friendlyDate}.`
         )
       )
-      this.updateDocument({
+      const document = {
         collection: 'Active',
         body: {
           _id: this.selectedDocument._id,
@@ -123,12 +123,19 @@ export default Vue.extend({
           },
           status: 'Atención programada'
         }
-      })
+      }
+      this.updateDocument(document)
         .then(() => {
           if (!this.emailNotification.enabled) return
           const addressee = this.collections.User.find(user => user._id === this.schedule.technician._id)
-          const notification = email({ email: this.emailNotification, data: this.selectedDocument, author: this.formOptions.user.fullName, addressee })
+          const notification = email({
+            email: this.emailNotification,
+            data: { ...this.selectedDocument, schedule: {...this.schedule} },
+            author: this.formOptions.user.fullName, addressee
+          })
           this.sendEmail([notification])
+            .then(() => { return })
+            .catch(() => this.loader = false)
         })
         .then(() => this.$emit('hideInterface'))
         .catch(() => this.loader = false)

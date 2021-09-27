@@ -25,7 +25,7 @@
           :updatingState="updatingState"
           :chartData="contractStatusXClient"
           title="Estatus de contratos"
-          :subtitle="thisMonth"
+          :subtitle="thisYear"
         />
       </v-col>
     </v-row>
@@ -44,7 +44,7 @@
           :updatingState="updatingState"
           :chartData="slaXClient"
           title="S. L. A. Por cliente"
-          :subtitle="`${thisMonth} (Cerrados)`"
+          :subtitle="`Reportes cerrados - ${thisYear}`"
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
@@ -61,7 +61,7 @@
           :updatingState="updatingState"
           :chartData="servicesXClient"
           title="Servicios por cliente"
-          :subtitle="thisMonth"
+          :subtitle="thisYear"
         />
       </v-col>
     </v-row>
@@ -118,8 +118,8 @@ export default {
     corrective () {
       return [...this.collections.Active, ...this.collections.Closed]
     },
-    thisMonth () {
-      return moment(new Date()).format('MMMM')
+    thisYear () {
+      return moment(new Date()).format('yyyy')
     },
     servicesXClient () {
       const type = 'line'
@@ -137,16 +137,10 @@ export default {
       }
       for (const client of this.formOptions.clients) {
         const clientServices = office => office.clientName === client.clientName
-        data.datasets[1].data.push(this.finishedMaintenance.filter(clientServices).length)
+        const closedMaintenances = this.collections.Maintenance.filter(service => service.status !== 'Asignado')
+        data.datasets[1].data.push(closedMaintenances.filter(clientServices).length)
       }
       return { type, data, options }
-    },
-
-    finishedMaintenance () {
-      const thisMonthFirst = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-      const fromThisMonth = (service) => moment(service.schedule.scheduledDate).parseZone('America/Caracas').isSameOrAfter(thisMonthFirst)
-      const main = this.collections.Maintenance.filter(service => fromThisMonth(service))
-      return main
     },
 
     contractStatusXClient () {

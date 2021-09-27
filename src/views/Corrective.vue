@@ -21,7 +21,7 @@
           :updatingState="updatingState"
           :chartData="servicesXClient"
           title="Servicios por cliente"
-          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
+          :subtitle="`Mantenimiento correctivo - ${thisYear}`"
         />
       </v-col>
       <v-col :cols="mobile ? 12 : 6">
@@ -38,7 +38,7 @@
           :updatingState="updatingState"
           :chartData="servicesXTechnician"
           title="Servicios por técnico"
-          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
+          :subtitle="`Mantenimiento correctivo - ${thisYear}`"
         />
       </v-col>
     </v-row>
@@ -69,12 +69,12 @@
           :updatingState="updatingState"
           :chartData="servicesXStatus"
           title="Estatus de servicios"
-          :subtitle="`Mantenimiento correctivo - ${thisMonth}`"
+          :subtitle="`Mantenimiento correctivo - ${thisYear}`"
         />
       </v-col>
     </v-row>
 
-    <MainButton @showForm="dialog = true" :updatingState="updatingState" />
+    <MainButton @showForm="dialog = true" :disabled="$store.state.session.user.userRole > 2" :updatingState="updatingState" />
 
     <v-dialog :width="mobile ? '90%' : '60%'" persistent v-model="dialog">
       <v-card>
@@ -180,12 +180,12 @@ export default {
       return [...this.collections.Active, ...this.collections.Closed]
     },
 
-    thisMonth () {
-      return moment(new Date()).format('MMMM')
+    thisYear () {
+      return moment(new Date()).format('yyyy')
     },
 
     servicesXStatus () {
-      const type = 'polarArea'
+      const type = 'doughnut'
       const options = {}
       let statusOptions = this.corrective.map(service => service.status)
       statusOptions = [...new Set(statusOptions)]
