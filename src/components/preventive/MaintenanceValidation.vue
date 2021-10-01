@@ -145,7 +145,9 @@
                 <v-col :cols="mobile ? 5 : 3">
                   <v-select
                     v-model="selectedProduct.locationNumber"
-                    :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
+                    :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                      11, 12, 13, 14, 15, 16, 18, 19, 20
+                    ]"
                     label="#"
                   />
                 </v-col>
@@ -204,7 +206,7 @@
 import Vue from 'vue'
 
 import moment from 'moment-timezone'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions, mapMutations } from 'vuex'
 import { maintenanceStatus, productLocations, rules } from '@/helpers/form'
 import Header from '@/components/generals/Header'
 import DateMenu from '@/components/generals/DateMenu'
@@ -286,6 +288,7 @@ export default Vue.extend({
   methods: {
 
     ...mapActions(['createDocument', 'updateDocument']),
+    ...mapMutations(['showSnackbar']),
 
     itIsWeekend (date) {
       return moment(date).format('dddd') === 'sábado' || moment(date).format('dddd') === 'domingo'
@@ -347,6 +350,10 @@ export default Vue.extend({
 
     productValidation (index, product) {
       product.serialCode = product.serialCode.toUpperCase()
+      const itsDuplicated = this.serialNotSubmitted
+        ? false
+        : this.serviceForm.inventory.find(inventory => inventory.serialCode === product.serialCode)
+      if (itsDuplicated) return this.showSnackbar({ error: 'El serial indicado ya se ha sido registrado'})
       product.location = product.location + product.locationNumber
       product.clientName = this.updating.clientName
       product.officeName = this.updating.officeName
