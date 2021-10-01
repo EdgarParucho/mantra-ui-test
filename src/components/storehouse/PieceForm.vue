@@ -72,7 +72,11 @@
         </v-row>
       </v-form>
     </v-card-text>
-
+    <v-row v-if="requiresMassiveUpdate" align="center">
+      <v-col>
+        <UpdateWarning triggeringProp="Nombre de pieza" :modifies="DependenciesNames" />
+      </v-col>
+    </v-row>
     <v-card-actions>
       <v-btn
         class="mx-auto"
@@ -93,10 +97,11 @@
 import { mapMutations, mapActions } from 'vuex'
 import { rules } from '@/helpers/form'
 import Header from '@/components/generals/Header'
+import UpdateWarning from '@/components/generals/UpdateWarning.vue'
 
 export default {
   name: 'PieceForm',
-  components: { Header },
+  components: { Header, UpdateWarning },
   props: ['collections', 'mobile', 'editing'],
 
   data: () => {
@@ -119,7 +124,12 @@ export default {
         code: '',
         description: ''
       },
-      rules
+      rules,
+      DependenciesNames: [
+      'Reportes activos', 'Reportes cerrados',
+      'Solicitudes', 'Despachos'
+    ],
+
     }
   },
 

@@ -67,6 +67,11 @@
           />
         </v-col>
       </v-row>
+      <v-row v-if="requiresMassiveUpdate" align="center">
+        <v-col>
+          <UpdateWarning triggeringProp="Nombre de producto" :modifies="DependenciesNames" />
+        </v-col>
+      </v-row>
       <v-btn
         @click="save(product)"
         :disabled="!form"
@@ -87,13 +92,14 @@ import { mapMutations, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import { rules } from '@/helpers/form'
 import Header from '@/components/generals/Header'
+import UpdateWarning from '@/components/generals/UpdateWarning.vue'
 
 moment.locale('es')
 
 export default Vue.extend({
 
   name: 'ProductForm',
-  components: { Header },
+  components: { Header, UpdateWarning },
   props: ['collections', 'mobile', 'editing'],
 
   data: () => ({
@@ -106,8 +112,13 @@ export default Vue.extend({
     categories: [],
     originalItem: {},
     loader: false,
-    rules
-
+    rules,
+    DependenciesNames: [
+      'Reportes activos', 'Reportes cerrados',
+      'Mantenimientos activos', 'Mantenimientos cerrados',
+      'Clientes', 'Oficinas',
+      'Piezas', 'Solicitudes', 'Despachos'
+    ]
   }),
 
   created () {

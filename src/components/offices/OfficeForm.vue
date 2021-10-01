@@ -212,6 +212,11 @@
               <v-text-field v-model="officeForm.closingHour" readonly label="Cierre" />
             </v-col>
           </v-row>
+          <v-row v-if="requiresMassiveUpdate" align="center">
+            <v-col>
+              <UpdateWarning triggeringProp="Nombre de oficina" :modifies="DependenciesNames" />
+            </v-col>
+          </v-row>
           <v-btn
             @click="save(officeForm)"
             color="success"
@@ -232,11 +237,12 @@
 import Header from '@/components/generals/Header'
 import { rules, states } from '@/helpers/form'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
+import UpdateWarning from '@/components/generals/UpdateWarning.vue'
 
 export default {
 
   name: 'OfficeForm',
-  components: { Header },
+  components: { Header, UpdateWarning },
   props: ['mobile', 'collections', 'editing'],
 
   data: () => ({
@@ -255,7 +261,12 @@ export default {
     states,
     timePicker: '',
     timePicker2: '',
-    loader: false
+    loader: false,
+    DependenciesNames: [
+      'Reportes activos', 'Reportes cerrados',
+      'Mantenimientos activos', 'Mantenimientos cerrados',
+      'Solicitudes', 'Despachos'
+    ]
   }),
 
   created () {

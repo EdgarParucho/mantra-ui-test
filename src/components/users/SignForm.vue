@@ -164,6 +164,11 @@
               <v-switch v-model="userForm.allowLogin" label="Permitir acceso" />
             </v-col>
           </v-row>
+          <v-row v-if="requiresMassiveUpdate" align="center">
+            <v-col>
+              <UpdateWarning triggeringProp="Nombre de usuario" :modifies="DependenciesNames" />
+            </v-col>
+          </v-row>
           <v-btn
             @click="save(userForm)"
             class="mt-2"
@@ -185,11 +190,12 @@
 
 import { mapMutations, mapActions } from 'vuex'
 import Header from '@/components/generals/Header'
+import UpdateWarning from '@/components/generals/UpdateWarning.vue'
 import { rules, departments, roles } from '@/helpers/form'
 export default {
 
   name: 'SignForm',
-  components: { Header },
+  components: { Header, UpdateWarning },
   props: ['mobile', 'editing'],
 
   data: () => ({
@@ -205,7 +211,11 @@ export default {
     step3Form: false,
     confirmPassword: '',
     updatePassword: false,
-
+    DependenciesNames: [
+      'Reportes activos', 'Reportes cerrados',
+      'Mantenimientos activos', 'Mantenimientos cerrados',
+      'Solicitudes', 'Despachos'
+    ],
     // Data imported from helpers/form.js
     rules,
     departments,

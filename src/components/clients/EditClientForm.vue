@@ -177,6 +177,11 @@
           </v-chip-group>
           </v-col>
         </v-row>
+        <v-row v-if="requiresMassiveUpdate" align="center">
+          <v-col>
+            <UpdateWarning triggeringProp="Nombre del cliente" :modifies="DependenciesNames" />
+          </v-col>
+        </v-row>
         <v-btn
           class="mt-2" @click="save(client)"
           color="success"
@@ -198,18 +203,18 @@ import { mapState, mapActions, mapMutations } from 'vuex'
 import { rules } from '@/helpers/form.js'
 import moment from 'moment-timezone'
 import Header from '@/components/generals/Header'
+import UpdateWarning from '@/components/generals/UpdateWarning.vue'
 
 moment.locale('es')
 
 export default Vue.extend({
 
   name: 'EditClientForm',
-  components: { Header },
+  components: { Header, UpdateWarning },
   props: ['mobile', 'editing'],
 
   created () {
     if (this.editing) this.client = JSON.parse(JSON.stringify(this.editing))
-    console.log(this.editing)
   },
 
   data: () => ({
@@ -236,11 +241,19 @@ export default Vue.extend({
     step1Completed: false,
     contactForm: false,
     datePicker: false,
-    loader: false
+    loader: false,
+    DependenciesNames: [
+      'Reportes activos', 'Reportes cerrados',
+      'Mantenimientos activos', 'Mantenimientos cerrados',
+      'Oficinas', 'Solicitudes', 'Despachos'
+    ]
   }),
 
   computed: {
-    ...mapState(['collections'])
+    ...mapState(['collections']),
+    requiresMassiveUpdate () {
+      return this.client.clientName !== this.editing.clientName
+    }
   },
 
   methods: {
@@ -288,7 +301,7 @@ export default Vue.extend({
     update (document) {
       document.body._id = this.editing._id
       this.updateDocument(document)
-        .then(() => { if (this.editing.clientName !== document.body.clientName) this.updateDependencies(document) })
+        .then(() => { if (this.requiresMassiveUpdate) this.updateDependencies(document) })
         .then(() => this.$emit('hideInterface'))
         .catch(() => this.loader = false)
     },

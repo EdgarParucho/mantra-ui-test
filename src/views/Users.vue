@@ -1,7 +1,12 @@
 <template>
   <v-container>
     <Header title="Usuarios" subtitle="Gestione la información básica" />
-    <v-data-table :items="collections.User" :headers="headers" :loading="updatingState">
+    <v-row>
+      <v-col :cols="mobile ? 6 : 3">
+        <v-text-field v-model="search" label="Buscar" prepend-icon="mdi-magnify" />
+      </v-col>
+    </v-row>
+    <v-data-table :items="collections.User" :search="search" :headers="headers" :loading="updatingState">
       <template v-slot:item.role="{ item }">
         {{ item.userRole | roles }}
       </template>
@@ -68,6 +73,7 @@ export default {
   data: () => ({
     signInterface: false,
     editing: null,
+    search: '',
     headers: [
       { text: 'Nombre', value: 'firstName' },
       { text: 'Apellido', value: 'lastName' },
