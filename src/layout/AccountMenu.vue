@@ -33,38 +33,82 @@
         </v-list-item>
       </v-list>
     </v-card>
-    <v-dialog v-model="showEmailsConfig" persistent :width="mobile ? '90%' : '60%'">
+    <v-dialog v-model="dialog" :persistent="showEmailsConfig" :width="mobile ? '90%' : '60%'">
       <v-card>
         <EmailsConfig v-if="showEmailsConfig" @hideInterface="showEmailsConfig = false" />
+        <v-form v-if="showPassForm">
+          <v-container>
+            <v-row>
+              <v-col>
+                <v-text-field v-model="userPassword" label="Nueva contraseña"
+                  type="password" :rules="rules.passwordRules" :maxLength="8" />
+              </v-col>
+              <v-col>
+                <v-text-field v-model="confirmation" label="Confirmar"
+                  type="password" :rules="rules.passwordRules"  :maxLength="8" 
+                  :error="!passwordComparison.match" :error-messages="confirmation ? passwordComparison.message : ''"
+                />
+              </v-col>
+              <v-card-actions>
+                <v-btn class="mx-auto" color="primary" @click="changePass(userPassword)">
+                  Confirmar
+                </v-btn>
+              </v-card-actions>
+            </v-row>
+          </v-container>
+        </v-form>
       </v-card>
     </v-dialog>
   </div>
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import axios from 'axios'
+import { mapState, mapMutations } from 'vuex'
 import EmailsConfig from './EmailsConfig.vue'
+import { rules } from '@/helpers/form'
 export default {
   name: 'AccountMenu',
   components: { EmailsConfig },
   props: ['mobile'],
   data: () => ({
+    rules,
+    dialog: false,
+    showPassForm: false,
     showEmailsConfig: false,
+    userPassword: '',
+    confirmation: '',
     menu: [
-      { icon: 'mdi-key', title: 'Cambiar contraseña', requiredRole: 3, action: '' },
+      { icon: 'mdi-key', title: 'Cambiar contraseña', requiredRole: 3, action: 'showPassForm' },
       { icon: 'mdi-email-edit', title: 'Correos del sistema', requiredRole: 1, action: 'showEmailsConfig' },
       { icon: 'mdi-logout', title: 'Cerrar esta sesión', requiredRole: 3, action: 'killSession' }
     ]
   }),
+  computed: {
+    ...mapState(['session']),
+    passwordComparison () {
+      let match = this.confirmation === this.userPassword
+      match = this.userPassword ? match : true
+      const message = match ? '' : 'No coinciden'
+      return { match, message }
+    }
+  },
   methods: {
-    ...mapMutations(['logOut']),
+    ...mapMutations(['logOut', 'showSnackbar']),
     killSession () {
       this.logOut()
       this.$session.destroy()
       this.$router.push('/login')
     },
     menuActions (action) {
+      if (action === 'killSession') this.killSession()
+      this.dialog = true
       this[action] = true
+    },
+    changePass (userPassword) {
+      axios.put(`/UserPass/${this.session.user._id}`, { userPassword }, { headers: { 'auth-token': this.session.token } })
+        .then(() => this.showSnackbar({ message: 'Actualizada correctamente' }), this.showPassForm = false)
+        .catch(() => this.showSnackbar({ error: 'Ocurrió un error desconocido' }))
     }
   }
 }

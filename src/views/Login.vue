@@ -132,7 +132,7 @@ export default {
     loader: false,
     selectedUser: '',
     users: [
-      { text: 'Edgar Parucho (Admin)', value: { idDocument: '20926619', userPassword: '20926619' } },
+      { text: 'Edgar Parucho (Admin)', value: { idDocument: '20926619', userPassword: '12345678' } },
       { text: 'Samuel Vivas (Usuario - Almacén)', value: { idDocument: '15367598', userPassword: '15367598' } },
       { text: 'Bryan Sanz (Usuario - Help Desk)', value: { idDocument: '20491189', userPassword: '20491189' } },
       { text: 'Luis Romero (Invitado - Técnico de campo)', value: { idDocument: '5183093', userPassword: '51830930' } }
