@@ -16,7 +16,7 @@
             type="card"
           ></v-skeleton-loader>
         </v-sheet>
-        <Graph v-else id="dashboardGraph3" :updatingState="updatingState"
+        <Graph v-else id="technicianGraph3" :updatingState="updatingState"
           :chartData="userSLA" title="Cumplimiento de S. L. A." :subtitle="thisYear"
         />
       </v-col>
@@ -45,7 +45,7 @@
             type="card"
           ></v-skeleton-loader>
         </v-sheet>
-        <Graph v-else id="dashboardGraph4" :updatingState="updatingState"
+        <Graph v-else id="technicianGraph4" :updatingState="updatingState"
           :chartData="userAveragePerVisits" title="Visitas por servicio" :subtitle="thisYear"
         />
       </v-col>
@@ -59,7 +59,7 @@
             type="card"
           ></v-skeleton-loader>
         </v-sheet>
-        <Graph v-else id="dashboardGraph1" :updatingState="updatingState"
+        <Graph v-else id="technicianGraph1" :updatingState="updatingState"
           :chartData="servicesXClient" title="Servicios por cliente" :subtitle="thisYear"
         />
       </v-col>
@@ -71,8 +71,22 @@
             type="card"
           ></v-skeleton-loader>
         </v-sheet>
-        <Graph v-else id="dashboardGraph2" :updatingState="updatingState"
+        <Graph v-else id="technicianGraph2" :updatingState="updatingState"
           :chartData="servicesXProduct" title="Servicios por producto" :subtitle="thisYear"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-sheet class="pa-3" v-if="updatingState">
+          <v-skeleton-loader
+            class="mx-auto"
+            max-width="300"
+            type="card"
+          ></v-skeleton-loader>
+        </v-sheet>
+        <Graph v-else id="technicianGraph5" :updatingState="updatingState"
+          :chartData="servicesXMonth" title="Servicios por mes" :subtitle="thisYear"
         />
       </v-col>
     </v-row>
@@ -189,20 +203,20 @@ export default {
       const chart = {
         title: 'Servicios por producto',
         config: {
-          type: 'line',
-          options: {},
+          type: 'bar',
+          options: { indexAxis: 'y' },
           data: {
             labels,
             datasets: [
               {
                 label: 'Correctivo',
                 data: [],
-                borderColor: this.$vuetify.theme.currentTheme.primary
+                backgroundColor: this.$vuetify.theme.currentTheme.primary
               },
               {
                 label: 'Preventivo',
                 data: [],
-                borderColor: this.$vuetify.theme.currentTheme.accent
+                backgroundColor: this.$vuetify.theme.currentTheme.accent
               }
             ]
           }
@@ -248,6 +262,28 @@ export default {
       const overOneVisitServices = this.userServices.closeds.filter(service => service.documentation.filter(register => register.visit).length > 1)
       data.datasets[0].data.push(oneVisitServices.length)
       data.datasets[0].data.push(overOneVisitServices.length)
+      return { type, data, options }
+    },
+
+    servicesXMonth () {
+      const labels = [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      ]
+      const type = 'line'
+      const options = {}
+      const data = {
+        labels,
+        datasets: [
+          { label: 'Correctivo', data: [], borderColor: this.$vuetify.theme.currentTheme.primary },
+          { label: 'Preventivo', data: [], borderColor: this.$vuetify.theme.currentTheme.accent }
+        ]
+      }
+      for (const label of labels) {
+        const monthServices = service => moment(service.schedule.scheduledDate).format('MMMM') === label
+        data.datasets[0].data.push(this.userServices.closeds.filter(monthServices).length)
+        data.datasets[1].data.push(this.userServices.maintenances.filter(monthServices).length)
+      }
       return { type, data, options }
     },
 

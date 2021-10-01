@@ -3,7 +3,7 @@
     <Header
       closable="1"
       title="Historial"
-      :subtitle="`Serial: ${relatedServices[0].serialCode}`"
+      subtitle=""
       @hideInterface="$emit('hideInterface')"
     />
     <v-timeline :dense="mobile">
@@ -26,7 +26,7 @@
           >
             {{ service.reportCode ? service.reportCode : 'Mantenimiento' }}
           </v-chip>
-          <v-tooltip top small color="accent">
+          <v-tooltip top small>
             <template v-slot:activator="{ on }">
               <v-btn
                 class="ml-1"
@@ -35,8 +35,8 @@
                 small
                 v-on="on"
               >
-                <v-icon small color="accent">
-                  mdi-eye-settings-outline
+                <v-icon>
+                  mdi-information-outline
                 </v-icon>
               </v-btn>
             </template>
@@ -83,6 +83,7 @@ export default {
 
   created () {
     this.sortServices()
+    console.log(this.relatedServices)
   },
 
   methods : {

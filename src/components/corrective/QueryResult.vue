@@ -63,8 +63,7 @@
                 @click="showDialog(option.action, item)"
                 :disabled="
                   (item.status === 'Asignado' && option.title === 'Validar')
-                  || (item.status === 'Culminado' && option.title === 'Re-asignar')
-                  || (item.status === 'Culminado' && option.title === 'Actualizar')
+                  || (item.status === 'Culminado' && option.title !== 'Validar')
                   || (option.requiredRole < $store.state.session.user.userRole)
                 "
               >
@@ -80,6 +79,10 @@
             </v-list-item-group>
           </v-list>
         </v-menu>
+        <v-btn @click="showInformation(item)" icon small
+          :color="item.reportCode ? 'primary' : 'accent'">
+          <v-icon>mdi-information-outline</v-icon>
+        </v-btn>
       </template>
     </v-data-table>
     <v-dialog
@@ -175,12 +178,10 @@ export default {
         { text: 'Acciones', value: 'actions' }
       ],
       reportsMenu: [
-        { action: 'details', title: 'Detalles', icon: 'mdi-information-outline', requiredRole: 3 },
         { action: 'schedule', title: 'Re-asignar', icon: 'mdi-account-arrow-left', requiredRole: 2 },
         { action: 'update', title: 'Actualizar', icon: 'mdi-file-refresh-outline', requiredRole: 2 }
       ],
       maintenanceMenu: [
-        { action: 'inventory', title: 'Buscar inventario', icon: 'mdi-file-search', requiredRole: 3 },
         { action: 'scheduleMaintenance', title: 'Re-asignar', icon: 'mdi-account-arrow-left', requiredRole: 2 },
         { action: 'updateMaintenance', title: 'Actualizar', icon: 'mdi-file-refresh-outline', requiredRole: 2 },
         { action: 'validateMaintenance', title: 'Validar', icon: 'mdi-check', requiredRole: 2 }
@@ -223,8 +224,14 @@ export default {
       this[`${menu}Interface`] = false
     },
 
+    showInformation (service) {
+      if (!service.reportCode) return this.showInventory(service.officeName, service.clientName)
+      else this.selectedDocument = Object.assign({}, service)
+      this.dialog = true
+      this.detailsInterface = true
+    },
+
     showDialog (menu, service) {
-      if (menu === 'inventory') return this.showInventory(service.officeName, service.clientName)
       this.selectedDocument = Object.assign({}, service)
       this.dialog = true
       this[`${menu}Interface`] = true
@@ -232,7 +239,7 @@ export default {
 
     showInventory (officeName, clientName) {
       this.selectedInventory = this.collections.Office.find(office => office.officeName === officeName && office.clientName === clientName).inventory
-      if (!this.selectedInventory.length) return this.showSnackbar({ message: 'El inventario no se ha registrado aún' })
+      if (!this.selectedInventory.length) return this.showSnackbar({ message: 'No se ha registrado información de mantenimientos anteriores' })
       else this.dialog = true, this.inventoryInterface = true
     }
 

@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <Header
+      v-if="!hideHeader"
       closable="1"
       title="Documentación"
       :subtitle="`Serial: ${selectedDocument.serialCode}`"
@@ -91,7 +92,7 @@ moment.locale('es')
 
 export default Vue.extend({
   name: 'MaintenanceInfo',
-  props: ['selectedDocument'],
+  props: ['selectedDocument', 'hideHeader'],
   components: { Header },
   filters: {
     friendlyDate (date) {

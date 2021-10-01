@@ -1,7 +1,6 @@
 <template>
   <v-container>
     <v-list dense>
-
       <v-list-item>
 
         <v-list-item-avatar v-show="!mobile">
@@ -22,52 +21,14 @@
               <span>{{ service.reportCode }}</span>
             </v-badge>
           </v-list-item-title>
-
           <v-list-item-subtitle class="subtitle-1 text-wrap">
             {{ service.officeName }}
           </v-list-item-subtitle>
           <v-list-item-subtitle class="subtitle-2 text-wrap">
             {{ service.productType }}
           </v-list-item-subtitle>
-
           <v-list-item-subtitle class="subtitle-2">
-
             {{ service.serialCode }}
-
-            <v-tooltip v-if="service.relatedDocuments" right small color="accent">
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  v-on="on"
-                  icon
-                  small
-                  color="accent"
-                  @click="showHistory(service)"
-                >
-                  <v-icon small color="accent">
-                    mdi-check
-                  </v-icon>
-                </v-btn>
-              </template>
-              Ver historial
-            </v-tooltip>
-
-            <v-tooltip v-else right small color="accent">
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  v-if="service.serialCode !== 'SIN SERIAL'"
-                  v-on="on"
-                  icon
-                  small
-                  @click="$emit('searchRelated', service)"
-                >
-                  <v-icon small color="error">
-                    mdi-magnify
-                  </v-icon>
-                </v-btn>
-              </template>
-              Buscar historial
-            </v-tooltip>
-
           </v-list-item-subtitle>
         </v-list-item-content>
 
@@ -75,7 +36,6 @@
           <v-btn @click="showInterface('details', service)" icon small>
             <v-icon color="primary">mdi-information-outline</v-icon>
           </v-btn>
-
           <v-menu>
             <template v-slot:activator="{ on }">
               <v-btn icon small v-on="on">
@@ -151,20 +111,6 @@
       </v-card>
     </v-dialog>
 
-    <v-bottom-sheet v-model="bottomSheet" scrollable>
-      <v-card>
-        <v-card-text>
-          <ProductHistory
-            v-if="bottomSheet"
-            :mobile="mobile"
-            :relatedServices="selectedServiceRelated"
-            @showInterface="showInterface"
-            @hideInterface="bottomSheet = false"
-          />
-        </v-card-text>
-      </v-card>
-    </v-bottom-sheet>
-
   </v-container>
 </template>
 
@@ -174,7 +120,6 @@ import CorrectiveInfo from './CorrectiveInfo'
 import CorrectiveSchedule from './CorrectiveSchedule'
 import CorrectiveUpdate from './CorrectiveUpdate'
 import CorrectiveForm from './CorrectiveForm'
-import ProductHistory from './ProductHistory'
 import MaintenanceInfo from '@/components/preventive/MaintenanceInfo'
 import CorrectiveDelete from './CorrectiveDelete'
 import { mapState, mapActions, mapMutations } from 'vuex'
@@ -187,7 +132,6 @@ export default {
     CorrectiveSchedule,
     CorrectiveUpdate,
     CorrectiveForm,
-    ProductHistory,
     CorrectiveDelete,
     MaintenanceInfo
   },
@@ -199,7 +143,6 @@ export default {
       updateInterface: false,
       deleteInterface: false,
       editInterface: false,
-      bottomSheet: false,
       searching: false,
       dialog: false,
 
@@ -234,11 +177,6 @@ export default {
       this.dialog = true
       this.selectedDocument = Object.assign({}, service)
       this[`${menu}Interface`] = true
-    },
-
-    showHistory (service) {
-      this.selectedServiceRelated = service.relatedDocuments
-      this.bottomSheet = true
     }
   }
 }

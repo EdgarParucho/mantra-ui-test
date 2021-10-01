@@ -3,10 +3,10 @@
     <Header
       closable="1"
       title="Documentación"
-      subtitle="Resumen e historial del servicio"
+      subtitle="Detalles del servicio"
       @hideInterface="$emit('hideInterface')"
     />
-    <v-card class="mx-auto" elevation="2">
+    <v-card v-if="serviceCopy.reportCode" class="mx-auto" elevation="2">
       <v-row align="center" justify="center">
         <v-col align="center">
           <v-avatar class="mb-2" color="secondary">
@@ -19,33 +19,33 @@
       <v-divider></v-divider>
       <v-row>
         <v-col :cols="mobile ? 12 : 6">
-          <v-card-title>Servicio {{ selectedDocument.reportCode }}</v-card-title>
+          <v-card-title>Servicio {{ serviceCopy.reportCode }}</v-card-title>
           <v-card-subtitle>
             <v-icon small>mdi-tools</v-icon>
-            {{ selectedDocument.itsSpecial ? 'Especial' : 'Correctivo' }}
+            {{ serviceCopy.itsSpecial ? 'Especial' : 'Correctivo' }}
           </v-card-subtitle>
           <v-card-text>
             <div class="my-1 text-subtitle-2">
               <v-icon small>mdi-calendar-outline</v-icon>
-              Reporte: {{ selectedDocument.reportedAt | friendlyDate }}
+              Reporte: {{ serviceCopy.reportedAt | friendlyDate }}
             </div>
             <div class="my-1 text-subtitle-2">
               <v-icon small>mdi-timer-outline</v-icon>
               Expira:
-              <span v-if="selectedDocument.itsSpecial">S. L. A. No aplicado</span>
-              <span v-else>{{ selectedDocument.expireDate | friendlyDate }}</span>
+              <span v-if="serviceCopy.itsSpecial">S. L. A. No aplicado</span>
+              <span v-else>{{ serviceCopy.expireDate | friendlyDate }}</span>
             </div>
             <div class="my-1 text-subtitle-2">
               <v-icon small>mdi-cog</v-icon>
-              Piezas solicitadas: {{ selectedDocument.pieces.length }}
+              Piezas solicitadas: {{ serviceCopy.pieces.length }}
             </div>
             <v-chip
-              :color="colorsXStatus[selectedDocument.status]"
+              :color="colorsXStatus[serviceCopy.status]"
               label
               dark
               small
             >
-              {{ selectedDocument.status }}
+              {{ serviceCopy.status }}
             </v-chip>
           </v-card-text>
         </v-col>
@@ -53,26 +53,26 @@
         <v-col :cols="mobile ? 12 : 6" align="end">
 
           <v-card-title class="justify-end">
-            {{ selectedDocument.clientName }}
+            {{ serviceCopy.clientName }}
           </v-card-title>
 
           <v-card-subtitle>
-            {{ selectedDocument.officeName }}
+            {{ serviceCopy.officeName }}
             <v-icon small>mdi-bank</v-icon>
           </v-card-subtitle>
 
           <v-card-text>
             <div class="my-1 text-subtitle-2">
-              {{ selectedDocument.productName }}
+              {{ serviceCopy.productName }}
               <v-icon small>mdi-printer</v-icon>
             </div>
             <div class="my-1 text-subtitle-2">
-              {{ selectedDocument.serialCode }}
+              <!-- {{ serviceCopy.serialCode }} -->
               <v-icon small>mdi-barcode</v-icon>
             </div>
 
             <div class="my-1 text-subtitle-2">
-              {{ selectedDocument.description }}
+              {{ serviceCopy.description }}
               <v-icon small>mdi-comment-text-outline</v-icon>
             </div>
 
@@ -81,7 +81,7 @@
               label
               small
             >
-              {{ selectedDocument.schedule.technician.fullName }}
+              {{ serviceCopy.schedule.technician.fullName }}
             </v-chip>
 
           </v-card-text>
@@ -89,10 +89,28 @@
       </v-row>
     </v-card>
 
-    <v-row class="mt-10">
+    <MaintenanceInfo v-else :selectedDocument="serviceCopy" :hideHeader="true" />
+
+    <v-row class="my-10">
+      <v-col align="center">
+        <v-btn @click="searchRelated(selectedDocument)" small outlined
+          :loading="searching">
+          <v-icon left>mdi-folder-search</v-icon>
+          Otros servicios del producto
+        </v-btn>
+      </v-col>
+      <v-col align="center">
+        <v-btn v-if="!originalIsSelected" @click="selectOriginal" small outlined color="error">
+          <v-icon left>mdi-undo</v-icon>
+          Volver al servicio original
+        </v-btn>
+      </v-col>
+    </v-row>
+
+    <v-row v-if="serviceCopy.reportCode">
       <v-col>
         <v-alert type="info" icon="mdi-information-outline" rounded="pill" text>
-          Acciones registradas
+          Bitácora del servicio
         </v-alert>
         <v-timeline
           align-top
@@ -100,7 +118,7 @@
           :dense="mobile"
         >
           <v-timeline-item
-            v-for="documentation, index in selectedDocument.documentation"
+            v-for="documentation, index in serviceCopy.documentation"
             :key="index"
             fill-dot
             :color="colorsXStatus[documentation.status]"
@@ -137,7 +155,7 @@
                       {{ documentation.date | friendlyDate }}
                     </span>
                     <v-row align="center">
-                      <v-col :cols="mobile ? 7 : 2">
+                      <v-col>
                         <v-text-field
                           v-model="documentation.serviceOrder.number"
                           prepend-inner-icon="mdi-card-bulleted"
@@ -147,16 +165,16 @@
                             : 'No validado'"
                         />
                       </v-col>
-                      <v-col cols="2">
+                      <v-col>
                         <v-tooltip :color="documentation.serviceOrder.validated ? 'warning' : 'primary'" top>
                           <template v-slot:activator="{ on }">
                             <v-btn
                               :outlined="!documentation.serviceOrder.validated"
                               :color="documentation.serviceOrder.validated ? 'primary' : 'warning'"
-                              :loading="loader"
+                              :loading="validating"
                               small v-on="on"
                               :disabled="$store.state.session.user.userRole > 2"
-                              @click="validateOrder(selectedDocument, index)"
+                              @click="validateOrder(serviceCopy, index)"
                             >
                               <v-icon>
                                 {{ documentation.serviceOrder.validated ? 'mdi-check' : 'mdi-exclamation' }}
@@ -200,6 +218,33 @@
         </v-timeline>
       </v-col>
     </v-row>
+    <v-bottom-sheet v-model="drawer">
+      <v-card>
+        <ProductHistory
+          v-if="drawer"
+          :mobile="mobile"
+          :relatedServices="relatedDocuments"
+          @showInterface="selectCopy"
+          @hideInterface="drawer = false"
+        />
+      </v-card>
+    </v-bottom-sheet>
+    <v-snackbar v-model="snackbar" dark outlined :timeout="2000" rounded="pill" centered transition="fab-transition">
+      <v-row align="center">
+        <v-col>
+          <span class="white--text">
+            {{ snackbarMessage }}
+          </span>
+        </v-col>
+        <v-col cols="2">
+          <v-btn :color="snackbarIconColor" fab outlined small @click.native="snackbar = false">
+            <v-icon>
+              {{ snackbarIcon }}
+            </v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -207,23 +252,41 @@
 
 import Vue from 'vue'
 import moment from 'moment-timezone'
-import { mapActions } from 'vuex'
-import Header from '@/components/generals/Header'
+import { mapActions, mapMutations } from 'vuex'
 import { rules } from '@/helpers/form.js'
+import MaintenanceInfo from '../preventive/MaintenanceInfo.vue'
+import ProductHistory from '@/components/corrective/ProductHistory.vue'
+import Header from '@/components/generals/Header'
 
 moment.locale('es')
 
 export default Vue.extend({
 
   name: 'CorrectiveInfo',
-  components: { Header },
-  props: ['selectedDocument', 'mobile'],
+  components: { MaintenanceInfo, Header, ProductHistory },
+  props: ['selectedDocument', 'mobile' ],
   
   data: () => {
     return {
+      drawer: false,
       rules,
-      loader: false,
-      selection: 1
+      validating: false,
+      selection: 1,
+      snackbar: false,
+      snackbarMessage: '',
+      snackbarIcon: '',
+      snackbarIconColor: '',
+      searching: false,
+      serviceCopy: {},
+      relatedDocuments: [],
+      originalIsSelected: true
+    }
+  },
+
+  created () {
+    this.serviceCopy = this.selectedDocument
+    if (this.selectedDocument.relatedDocuments) {
+      if (this.selectedDocument.relatedDocuments.length) this.relatedDocuments = this.selectedDocument.relatedDocuments
     }
   },
 
@@ -231,6 +294,10 @@ export default Vue.extend({
 
     friendlyDate (date) {
       return moment(date).parseZone('America/Caracas').format('DD/MM/YYYY HH:mm')
+    },
+
+    relativeDate (date) {
+      return moment(date).fromNow()
     },
 
     initials (name) {
@@ -243,8 +310,7 @@ export default Vue.extend({
   computed: {
     
     assignedTo () {
-      const assignements = this.selectedDocument.documentation.filter(record => record.technician)
-      console.log(assignements)
+      const assignements = this.serviceCopy.documentation.filter(record => record.technician)
       return assignements.length ? assignements.pop().technician.fullName : 'No asignado'
     },
 
@@ -258,21 +324,70 @@ export default Vue.extend({
         "Atención programada": this.$vuetify.theme.currentTheme.accent
       }
     }
-
   },
 
   methods: {
 
-    ...mapActions(['updateDocument']),
+    ...mapActions(['updateDocument', 'findDocuments']),
+    ...mapMutations(['setRelatedDocuments']),
 
     validateOrder (body, i) {
-      this.loader = true
+      this.validating = true
       body.documentation[i].serviceOrder.validated = !body.documentation[i].serviceOrder.validated
       this.updateDocument({
         collection: body.status.includes('Cerrado') ? 'Closed' : 'Active',
         body
       })
-        .finally(() => this.loader = false)
+        .finally(() => this.validating = false)
+    },
+
+    searchRelated (service) {
+      if (this.relatedDocuments.length) return this.drawer = true
+      this.searching = true
+      const closedsFilter = { "$or": [{ serialCode: service.serialCode }, { "documentation.newSerial": service.serialCode }] }
+      const searchInCollections = [
+        this.findDocuments({ collection: 'Closed', filter: closedsFilter }),
+        this.findDocuments({ collection: 'Inventory', filter: { serialCode: service.serialCode } })
+      ]
+      Promise.all(searchInCollections)
+        .then((res) => {
+          this.searching = false
+          const data = [...res[0], ...res[1]]
+          if (data.length) {
+            this.setRelatedDocuments({ serialCode: service.serialCode, data })
+            this.relatedDocuments = data
+            this.drawer = true
+            this.alertResult(true)
+          } else {
+            this.alertResult(false)
+          }
+        })
+        .catch(() => this.searching = false)
+    },
+
+    alertResult (results) {
+      if (results) {
+        this.snackbarMessage = 'Encontramos servicios relacionados'
+        this.snackbarIcon = 'mdi-check'
+        this.snackbarIconColor = 'accent lighten-1'
+        this.snackbar = true
+      } else {
+        this.snackbarMessage = 'La búsqueda no arrojó resultados'
+        this.snackbarIcon = 'mdi-alert'
+        this.snackbarIconColor = 'error lighten-1'
+        this.snackbar = true
+      }
+    },
+
+    selectCopy (interd, service) {
+      this.serviceCopy = service
+      this.originalIsSelected = false
+      this.drawer = false
+    },
+
+    selectOriginal () {
+      this.serviceCopy = this.selectedDocument
+      this.originalIsSelected = true
     }
   }
 })
