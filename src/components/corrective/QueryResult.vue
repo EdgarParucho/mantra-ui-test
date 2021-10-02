@@ -83,6 +83,9 @@
           :color="item.reportCode ? 'primary' : 'accent'">
           <v-icon>mdi-information-outline</v-icon>
         </v-btn>
+        <v-btn @click="share(item)" icon small :color="item.reportCode ? 'primary' : 'accent'">
+          <v-icon>mdi-share-variant</v-icon>
+        </v-btn>
       </template>
     </v-data-table>
     <v-dialog
@@ -241,6 +244,18 @@ export default {
       this.selectedInventory = this.collections.Office.find(office => office.officeName === officeName && office.clientName === clientName).inventory
       if (!this.selectedInventory.length) return this.showSnackbar({ message: 'No se ha registrado información de mantenimientos anteriores' })
       else this.dialog = true, this.inventoryInterface = true
+    },
+
+    share ({ clientName, officeName, reportCode, productName, serialCode, description }) {
+      const serviceData = reportCode
+        ? `reporte ${reportCode}, ${productName}, serial ${serialCode}, ${description}`
+        : 'Mantenimiento preventivo'
+      navigator.share({
+        title: 'Servicio registrado',
+        text: `Te comparto los datos de un servicio registrado en Mantra.
+          ${clientName} ${officeName}. ${serviceData}
+        `
+      })
     }
 
   }

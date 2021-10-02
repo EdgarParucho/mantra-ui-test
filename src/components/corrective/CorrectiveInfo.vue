@@ -327,7 +327,7 @@ export default Vue.extend({
   methods: {
 
     ...mapActions(['updateDocument', 'findDocuments']),
-    ...mapMutations(['setRelatedDocuments']),
+    ...mapMutations(['setRelatedDocuments', 'showSnackbar']),
 
     validateOrder (body, i) {
       this.validating = true
@@ -340,6 +340,9 @@ export default Vue.extend({
     },
 
     searchRelated (service) {
+      if (service.serialCode === 'SIN SERIAL') return this.showSnackbar({
+        error: 'No es posible asociar este servicio con otros mientras no se registre el serial del producto'
+      })
       if (this.relatedDocuments.length) return this.drawer = true
       this.searching = true
       const closedsFilter = { 

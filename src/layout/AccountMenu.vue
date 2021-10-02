@@ -35,7 +35,7 @@
     </v-card>
     <v-dialog v-model="dialog" :persistent="showEmailsConfig" :width="mobile ? '90%' : '60%'">
       <v-card>
-        <EmailsConfig v-if="showEmailsConfig" @hideInterface="showEmailsConfig = false" />
+        <EmailsConfig v-if="showEmailsConfig" @hideInterface="closeInterfaces" />
         <v-form v-if="showPassForm">
           <v-container>
             <v-row>
@@ -109,6 +109,10 @@ export default {
       axios.put(`/UserPass/${this.session.user._id}`, { userPassword }, { headers: { 'auth-token': this.session.token } })
         .then(() => this.showSnackbar({ message: 'Actualizada correctamente' }), this.showPassForm = false)
         .catch(() => this.showSnackbar({ error: 'Ocurrió un error desconocido' }))
+    },
+    closeInterfaces () {
+      this.showEmailsConfig = false
+      this.dialog = false
     }
   }
 }

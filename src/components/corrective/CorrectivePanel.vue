@@ -33,13 +33,13 @@
         </v-list-item-content>
 
         <v-list-item-action>
-          <v-btn @click="showInterface('details', service)" icon small>
-            <v-icon color="primary">mdi-information-outline</v-icon>
+          <v-btn @click="showInterface('details', service)" icon small color="primary">
+            <v-icon>mdi-information-outline</v-icon>
           </v-btn>
           <v-menu>
             <template v-slot:activator="{ on }">
-              <v-btn icon small v-on="on">
-                <v-icon color="primary">mdi-dots-vertical</v-icon>
+              <v-btn icon small v-on="on" color="primary" >
+                <v-icon>mdi-dots-vertical</v-icon>
               </v-btn>
             </template>
             <v-list color="primary" dark dense>
@@ -178,6 +178,7 @@ export default {
       this.selectedDocument = Object.assign({}, service)
       this[`${menu}Interface`] = true
     }
+
   }
 }
 </script>
