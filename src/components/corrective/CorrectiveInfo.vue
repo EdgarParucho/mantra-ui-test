@@ -9,10 +9,8 @@
     <v-card v-if="serviceCopy.reportCode" class="mx-auto" elevation="2">
       <v-row align="center" justify="center">
         <v-col align="center">
-          <v-avatar class="mb-2" color="secondary">
-            <v-avatar size="90%" color="white">
-              <v-img src="@/assets/logo.png"></v-img>
-            </v-avatar>
+          <v-avatar class="mb-2">
+            <v-img src="@/assets/logo.svg"></v-img>
           </v-avatar>
         </v-col>
       </v-row>
@@ -67,7 +65,7 @@
               <v-icon small>mdi-printer</v-icon>
             </div>
             <div class="my-1 text-subtitle-2">
-              <!-- {{ serviceCopy.serialCode }} -->
+              {{ serviceCopy.serialCode }}
               <v-icon small>mdi-barcode</v-icon>
             </div>
 
@@ -344,7 +342,12 @@ export default Vue.extend({
     searchRelated (service) {
       if (this.relatedDocuments.length) return this.drawer = true
       this.searching = true
-      const closedsFilter = { "$or": [{ serialCode: service.serialCode }, { "documentation.newSerial": service.serialCode }] }
+      const closedsFilter = { 
+        "$or": [
+          { serialCode: service.serialCode }, { "documentation.newSerial": service.serialCode }
+        ],
+        _id: { "$ne": service._id }
+      }
       const searchInCollections = [
         this.findDocuments({ collection: 'Closed', filter: closedsFilter }),
         this.findDocuments({ collection: 'Inventory', filter: { serialCode: service.serialCode } })

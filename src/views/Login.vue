@@ -28,7 +28,7 @@
               <v-col :cols="4">
                 <v-row>
                   <v-col align="center">
-                    <v-img src="@/assets/logo.png" width="70" />
+                    <v-img src="@/assets/logo.svg" width="70" />
                     <v-spacer />
                     <v-btn href="https://instagram.com/microfilmscenter" target="blank" color="primary" icon>
                       <v-icon>mdi-instagram</v-icon>

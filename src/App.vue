@@ -34,7 +34,6 @@ export default {
   created () {
     const activeSession = this.$session.get('session')
     this.$store.state.session = activeSession
-    this.$vuetify.theme.isDark = true
     if (activeSession) {
       this.getcollections()
     } else {

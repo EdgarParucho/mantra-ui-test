@@ -509,15 +509,12 @@ export default Vue.extend({
 
     async save (newService) {
       this.loader = true
-
       const existOnDB = (!this.requiresCorrelate || !this.serialNotSubmitted)
         ? await this.preventDuplicity(newService)
         : false
       if (existOnDB) return this.loader = false
-
       const body = await this.completeBody(newService)
       if (body.throwsError) return this.showSnackbar({ error: body.throwsError }), this.loader = false
-
       if (this.editing) return this.update({ collection: 'Active', body })
       else this.create({ collection: 'Active', body })
     },
@@ -558,12 +555,9 @@ export default Vue.extend({
         if (correlative.throwsError) return { throwsError: correlative.throwsError }
         else form.reportCode = correlative.val
       }
-
       const observations = this.setDocumentation('')
-
       if (this.editing) form.documentation.push(observations)
       else form.documentation = this.setDocumentation('')
-
       if (!this.serviceForm.itsSpecial) {
         form.expireDate = this.getExpireDate()
         const minutesLeft = moment(form.expireDate).diff(new Date(), 'minutes')

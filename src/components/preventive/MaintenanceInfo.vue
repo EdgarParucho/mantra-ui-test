@@ -10,10 +10,8 @@
     <v-card class="mx-auto" elevation="2">
       <v-row align="center" justify="center">
         <v-col align="center">
-          <v-avatar class="mb-2" color="secondary">
-            <v-avatar size="90%" color="white">
-              <v-img src="@/assets/logo.png"></v-img>
-            </v-avatar>
+          <v-avatar class="mb-2">
+            <v-img src="@/assets/logo.svg"></v-img>
           </v-avatar>
         </v-col>
       </v-row>
