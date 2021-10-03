@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-app-bar class="px-3" color="primary" dark app>
+    <v-app-bar class="px-3" :color="$vuetify.theme.isDark ? 'dark' : 'primary'" dark app>
       <v-menu :value="drawer" nudge-bottom="70">
         <template v-slot:activator="{ on }">
           <v-app-bar-nav-icon v-on="on" />

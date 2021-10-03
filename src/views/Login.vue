@@ -157,6 +157,7 @@ export default {
       this.loader = true
       this.logIn(user)
         .then((session) => {
+          this.$vuetify.theme.isDark = session.user.preferences.darkTheme
           this.$session.start()
           this.$session.set('session', session)
           this.loader = false

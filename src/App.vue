@@ -33,12 +33,12 @@ export default {
   methods: { ...mapMutations(['logIn']), ...mapActions(['getcollections']) },
   created () {
     const activeSession = this.$session.get('session')
-    this.$store.state.session = activeSession
     if (activeSession) {
+      this.$store.state.session = activeSession
       this.getcollections()
-    } else {
-      if (this.$router.currentRoute.fullPath !== '/login') this.$router.push('/login')
+      this.$vuetify.theme.isDark = activeSession.user.preferences.darkTheme
     }
+    else if (this.$router.currentRoute.fullPath !== '/login') this.$router.push('/login')
   }
 
 }

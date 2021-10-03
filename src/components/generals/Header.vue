@@ -11,6 +11,7 @@
           dark
           :icon="closable ? null : 'mdi-map-marker'"
           :outlined="!closable" :tile="closable === '1'"
+          :text="$vuetify.theme.isDark"
         >
           <v-row>
             <v-col>

@@ -122,26 +122,25 @@
             :color="colorsXStatus[documentation.status]"
             small
           >
-            <v-card class="elevation-2 my-1" outlined color="#eee">
+            <v-card class="elevation-2 my-1">
               <v-card-title class="text-h6 text-no-wrap">
                 {{ documentation.type }}
               </v-card-title>
-              <v-card-text class="white text--primary">
+              <v-card-text>
                 <p>
                 {{ documentation.observations }}
                 </p>
               </v-card-text>
               <v-container v-if="documentation.serviceOrder">
                 <section v-if="documentation.serviceOrder.number">
-                  <small class="caption text--secondary">
-                    <v-chip v-if="documentation.visit" color="info" label x-small>
+                  <small class="caption">
+                    <v-chip v-if="documentation.visit" label x-small>
                       Visita técnica
                     </v-chip>
                     <br>
                     <template v-if="documentation.technician">
                       <v-chip
                         v-if="documentation.technician.fullName !== 'No asignado'"
-                        color="info"
                         label
                         x-small
                       >

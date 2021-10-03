@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card class="gradients" width="256">
-      <v-list color="hsla(140, 45%, 55%, .3)" dark dense nav elevation="1">
+      <v-list color="hsla(140, 45%, 55%, .1)" dark dense nav elevation="1">
         <v-list-item
           v-for="option in options"
           :key="option.title"

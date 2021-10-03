@@ -18,8 +18,7 @@
           </v-col>
         </v-row>
       </v-list-item>
-      <v-divider class="my-2" />
-      <v-list color="hsla(140, 45%, 55%, .2)" dense nav elevation="1">
+      <v-list color="hsla(140, 45%, 55%, .1)" dense nav elevation="1">
         <v-list-item v-for="option, index of menu" :key="index"
           v-show="option.requiredRole >= $session.get('session').user.userRole"
           @click="menuActions(option.action)"
@@ -32,6 +31,9 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+      <v-card-actions>
+        <v-switch v-model="darkMode" @click.passive="setPreferedTheme" color="white" label="Modo oscuro" prepend-icon="mdi-weather-night" />
+      </v-card-actions>
     </v-card>
     <v-dialog v-model="dialog" :persistent="showEmailsConfig" :width="mobile ? '90%' : '60%'">
       <v-card>
@@ -50,7 +52,7 @@
                 />
               </v-col>
               <v-card-actions>
-                <v-btn class="mx-auto" color="primary" @click="changePass(userPassword)">
+                <v-btn class="mx-auto" color="primary" @click="updateAccount({ userPassword })">
                   Confirmar
                 </v-btn>
               </v-card-actions>
@@ -72,6 +74,7 @@ export default {
   components: { EmailsConfig },
   props: ['mobile'],
   data: () => ({
+    darkMode: false,
     rules,
     dialog: false,
     showPassForm: false,
@@ -84,6 +87,9 @@ export default {
       { icon: 'mdi-logout', title: 'Cerrar esta sesión', requiredRole: 3, action: 'killSession' }
     ]
   }),
+  created () {
+    this.darkMode = this.$vuetify.theme.isDark
+  },
   computed: {
     ...mapState(['session']),
     passwordComparison () {
@@ -105,14 +111,21 @@ export default {
       this.dialog = true
       this[action] = true
     },
-    changePass (userPassword) {
-      axios.put(`/UserPass/${this.session.user._id}`, { userPassword }, { headers: { 'auth-token': this.session.token } })
-        .then(() => this.showSnackbar({ message: 'Actualizada correctamente' }), this.showPassForm = false)
+    updateAccount (body) {
+      axios.put(`/Account/${this.session.user._id}`, body, { headers: { 'auth-token': this.session.token } })
+        .then(() => this.showSnackbar({ message: 'Actualizamos tus preferencias' }), this.showPassForm = false)
         .catch(() => this.showSnackbar({ error: 'Ocurrió un error desconocido' }))
     },
     closeInterfaces () {
       this.showEmailsConfig = false
       this.dialog = false
+    },
+    setPreferedTheme () {
+      this.$vuetify.theme.isDark = this.darkMode
+      let preferences = this.session.user.preferences
+      preferences.darkTheme = this.darkMode
+      this.updateAccount({ preferences })
+      this.$session.set('session', this.session)
     }
   }
 }
