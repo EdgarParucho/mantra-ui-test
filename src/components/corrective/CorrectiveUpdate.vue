@@ -15,7 +15,9 @@
       </v-stepper-step>
 
       <v-stepper-content step="1">
-
+        <v-alert v-if="selectedDocument.serialCode === 'SIN SERIAL'" type="warning" text rounded="pill">
+          Si cierras el servicio sin asociar el serial, no será posible relacionarlo con otros.
+        </v-alert>
         <v-form ref="step1Completed" v-model="step1Completed">
           <v-row>
             <v-col cols="6">
